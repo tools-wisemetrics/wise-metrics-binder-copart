@@ -6,11 +6,27 @@ from __future__ import annotations
 import csv
 import json
 import unicodedata
+import pandas as pd
 from pathlib import Path
+
+import os
+from dotenv import load_dotenv
+from supabase import create_client, Client
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "raw"
 OUT = ROOT / "src" / "lib" / "data" / "raw-snapshot.json"
+
+load_dotenv()
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+supabase: Client | None = None
+if SUPABASE_URL and SUPABASE_KEY:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+else:
+    print("Aviso: Variáveis do Supabase não encontradas!")
 
 
 def find_raw(*needles: str) -> Path:
@@ -126,40 +142,82 @@ def result_type(indicator: str) -> str:
         return "conversion"
     return "other"
 
-
+# ==========================================
+# 1. PARSE META CAMPANHAS (Direto da View 3)
+# ==========================================
 def parse_meta() -> list[dict]:
-    path = find_raw("meta-ads_campanhas")
+    if not supabase:
+        print("Aviso: Supabase não configurado. Pulando Meta.")
+        return []
+
+    # Lê da View 3 criada no Supabase
+    response = supabase.from_("meta_ads_campanhas").select("*").execute()
+    rows = response.data or []
+
     campaigns = []
-    with path.open(encoding="utf-8", newline="") as handle:
-        for row in csv.DictReader(handle):
-            spend = br_number(row.get("Amount spent (BRL)"))
-            impressions = int(br_number(row.get("Impressions")))
-            ctr = br_number(row.get("Unique CTR (link click-through rate)"))
-            clicks = int(round(impressions * ctr / 100)) if impressions and ctr else 0
-            results = br_number(row.get("Results"))
-            rtype = result_type(row.get("Result indicator") or "")
-            name = row.get("Campaign name") or ""
-            if spend <= 0 and results <= 0 and impressions <= 0:
-                continue
-            campaigns.append(
-                {
-                    "source": "meta",
-                    "name": name,
-                    "adGroup": None,
-                    "unit": classify_unit(name),
-                    "delivery": row.get("Campaign delivery") or "",
-                    "spend": round(spend, 2),
-                    "impressions": impressions,
-                    "reach": int(br_number(row.get("Reach"))),
-                    "clicks": clicks,
-                    "ctr": round(ctr, 4),
-                    "results": results,
-                    "resultType": rtype,
-                    "conversas": int(br_number(row.get("Total messaging contacts"))),
-                    "newConversas": int(br_number(row.get("New messaging contacts"))),
-                }
-            )
+    for row in rows:
+        spend = float(row.get("Amount spent (BRL)") or 0.0)
+        impressions = int(row.get("Impressions") or 0)
+        ctr = float(row.get("Unique CTR (link click-through rate)") or 0.0)
+        clicks = int(round(impressions * ctr / 100)) if impressions and ctr else 0
+        purchases = float(row.get("Purchases") or 0.0)
+        name = row.get("Campaign name") or ""
+
+        if spend <= 0 and purchases <= 0 and impressions <= 0:
+            continue
+
+        campaigns.append({
+            "source": "meta",
+            "name": name,
+            "adGroup": None,
+            "unit": classify_unit(name),
+            "delivery": row.get("Campaign delivery") or "",
+            "spend": round(spend, 2),
+            "impressions": impressions,
+            "reach": int(row.get("Reach") or 0),
+            "clicks": clicks,
+            "ctr": round(ctr, 4),
+            "results": purchases,
+            "resultType": "conversion",
+            "conversas": int(row.get("Total messaging contacts") or 0),
+            "newConversas": int(row.get("New messaging contacts") or 0),
+        })
     return campaigns
+
+
+# def parse_meta() -> list[dict]:
+#     path = find_raw("meta-ads_campanhas")
+#     campaigns = []
+#     with path.open(encoding="utf-8", newline="") as handle:
+#         for row in csv.DictReader(handle):
+#             spend = br_number(row.get("Amount spent (BRL)"))
+#             impressions = int(br_number(row.get("Impressions")))
+#             ctr = br_number(row.get("Unique CTR (link click-through rate)"))
+#             clicks = int(round(impressions * ctr / 100)) if impressions and ctr else 0
+#             results = br_number(row.get("Results"))
+#             rtype = result_type(row.get("Result indicator") or "")
+#             name = row.get("Campaign name") or ""
+#             if spend <= 0 and results <= 0 and impressions <= 0:
+#                 continue
+#             campaigns.append(
+#                 {
+#                     "source": "meta",
+#                     "name": name,
+#                     "adGroup": None,
+#                     "unit": classify_unit(name),
+#                     "delivery": row.get("Campaign delivery") or "",
+#                     "spend": round(spend, 2),
+#                     "impressions": impressions,
+#                     "reach": int(br_number(row.get("Reach"))),
+#                     "clicks": clicks,
+#                     "ctr": round(ctr, 4),
+#                     "results": results,
+#                     "resultType": rtype,
+#                     "conversas": int(br_number(row.get("Total messaging contacts"))),
+#                     "newConversas": int(br_number(row.get("New messaging contacts"))),
+#                 }
+#             )
+#     return campaigns
 
 
 def parse_google() -> list[dict]:
@@ -327,71 +385,135 @@ def parse_copart() -> list[dict]:
             )
     return rows
 
-
+# ====================================================
+# 2. PARSE META ANÚNCIOS / CRIATIVOS (Direto da View 2)
+# ====================================================
 def parse_meta_ads() -> list[dict]:
-    path = find_raw("meta-ads_anuncios_")
+    if not supabase:
+        return []
+
+    # Lê da View 2 criada no Supabase
+    response = supabase.from_("meta_ads_anuncios").select("*").execute()
+    rows = response.data or []
+
     merged: dict[tuple[str, str], dict] = {}
-    with path.open(encoding="utf-8", newline="") as handle:
-        for index, row in enumerate(csv.DictReader(handle)):
-            name = (row.get("Ad name") or "").strip()
-            ad_set = (row.get("Ad set name") or "").strip()
-            if not name:
-                continue
-            spend = br_number(row.get("Amount spent (BRL)"))
-            impressions = int(br_number(row.get("Impressions")))
-            results = br_number(row.get("Results"))
-            rtype = result_type(row.get("Result indicator") or "")
-            key = (name, ad_set)
-            rec = merged.get(key)
-            if rec is None:
-                rec = {
-                    "id": f"meta-{len(merged) + 1}",
-                    "source": "meta",
-                    "name": name,
-                    "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
-                    "adGroup": ad_set,
-                    "unit": classify_unit(name, ad_set),
-                    "delivery": row.get("Ad delivery") or "",
-                    "adType": "Anúncio Meta",
-                    "format": "n/d",
-                    "quality": None,
-                    "qualityHint": None,
-                    "finalUrl": None,
-                    "headlines": [],
-                    "descriptions": [],
-                    "hasImageIds": False,
-                    "spend": 0.0,
-                    "impressions": 0,
-                    "reach": 0,
-                    "clicks": 0,
-                    "ctr": 0.0,
-                    "resultsCadastro": 0.0,
-                    "resultsLanding": 0.0,
-                    "conversas": 0,
-                    "conversions": 0.0,
-                }
-                merged[key] = rec
-            rec["spend"] = max(rec["spend"], round(spend, 2))
-            rec["impressions"] = max(rec["impressions"], impressions)
-            rec["reach"] = max(rec["reach"], int(br_number(row.get("Reach"))))
-            rec["conversas"] = max(rec["conversas"], int(br_number(row.get("Total messaging contacts"))))
-            if (row.get("Ad delivery") or "") == "active":
-                rec["delivery"] = "active"
-            if rtype == "cadastro":
-                rec["resultsCadastro"] += results
-            elif rtype == "landing":
-                rec["resultsLanding"] += results
-            rec["conversions"] = rec["resultsCadastro"]
-    out = []
-    for rec in merged.values():
-        if rec["spend"] <= 0 and rec["impressions"] <= 0 and rec["resultsCadastro"] <= 0 and rec["resultsLanding"] <= 0:
+    for row in rows:
+        name = (row.get("Ad name") or "").strip()
+        ad_set = (row.get("Ad set name") or "").strip()
+        if not name:
             continue
-        rec["resultsCadastro"] = round(rec["resultsCadastro"], 2)
-        rec["resultsLanding"] = round(rec["resultsLanding"], 2)
-        rec["conversions"] = round(rec["conversions"], 2)
-        out.append(rec)
-    out.sort(key=lambda row: row["spend"], reverse=True)
+
+        spend = float(row.get("Amount spent (BRL)") or 0.0)
+        impressions = int(row.get("Impressions") or 0)
+        purchases = float(row.get("Purchases") or 0.0)
+        key = (name, ad_set)
+        
+        rec = merged.get(key)
+        if rec is None:
+            rec = {
+                "id": f"meta-{len(merged) + 1}",
+                "source": "meta",
+                "name": name,
+                "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
+                "adGroup": ad_set,
+                "unit": classify_unit(name, ad_set),
+                "delivery": row.get("Ad delivery") or "",
+                "adType": "Anúncio Meta",
+                "format": "n/d",
+                "quality": row.get("Quality ranking"),
+                "qualityHint": None,
+                "finalUrl": None,
+                "headlines": [],
+                "descriptions": [],
+                "hasImageIds": False,
+                "spend": 0.0,
+                "impressions": 0,
+                "reach": 0,
+                "clicks": 0,
+                "ctr": 0.0,
+                "resultsCadastro": 0.0,
+                "resultsLanding": 0.0,
+                "conversas": 0,
+                "conversions": 0.0,
+            }
+            merged[key] = rec
+
+        rec["spend"] = max(rec["spend"], round(spend, 2))
+        rec["impressions"] = max(rec["impressions"], impressions)
+        rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
+        rec["conversas"] = max(rec["conversas"], int(row.get("Total messaging contacts") or 0))
+        rec["conversions"] += purchases
+
+    out = [r for r in merged.values() if r["spend"] > 0 or r["impressions"] > 0 or r["conversions"] > 0]
+    out.sort(key=lambda r: r["spend"], reverse=True)
     return out
+
+
+
+# def parse_meta_ads() -> list[dict]:
+#     path = find_raw("meta-ads_anuncios_")
+#     merged: dict[tuple[str, str], dict] = {}
+#     with path.open(encoding="utf-8", newline="") as handle:
+#         for index, row in enumerate(csv.DictReader(handle)):
+#             name = (row.get("Ad name") or "").strip()
+#             ad_set = (row.get("Ad set name") or "").strip()
+#             if not name:
+#                 continue
+#             spend = br_number(row.get("Amount spent (BRL)"))
+#             impressions = int(br_number(row.get("Impressions")))
+#             results = br_number(row.get("Results"))
+#             rtype = result_type(row.get("Result indicator") or "")
+#             key = (name, ad_set)
+#             rec = merged.get(key)
+#             if rec is None:
+#                 rec = {
+#                     "id": f"meta-{len(merged) + 1}",
+#                     "source": "meta",
+#                     "name": name,
+#                     "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
+#                     "adGroup": ad_set,
+#                     "unit": classify_unit(name, ad_set),
+#                     "delivery": row.get("Ad delivery") or "",
+#                     "adType": "Anúncio Meta",
+#                     "format": "n/d",
+#                     "quality": None,
+#                     "qualityHint": None,
+#                     "finalUrl": None,
+#                     "headlines": [],
+#                     "descriptions": [],
+#                     "hasImageIds": False,
+#                     "spend": 0.0,
+#                     "impressions": 0,
+#                     "reach": 0,
+#                     "clicks": 0,
+#                     "ctr": 0.0,
+#                     "resultsCadastro": 0.0,
+#                     "resultsLanding": 0.0,
+#                     "conversas": 0,
+#                     "conversions": 0.0,
+#                 }
+#                 merged[key] = rec
+#             rec["spend"] = max(rec["spend"], round(spend, 2))
+#             rec["impressions"] = max(rec["impressions"], impressions)
+#             rec["reach"] = max(rec["reach"], int(br_number(row.get("Reach"))))
+#             rec["conversas"] = max(rec["conversas"], int(br_number(row.get("Total messaging contacts"))))
+#             if (row.get("Ad delivery") or "") == "active":
+#                 rec["delivery"] = "active"
+#             if rtype == "cadastro":
+#                 rec["resultsCadastro"] += results
+#             elif rtype == "landing":
+#                 rec["resultsLanding"] += results
+#             rec["conversions"] = rec["resultsCadastro"]
+#     out = []
+#     for rec in merged.values():
+#         if rec["spend"] <= 0 and rec["impressions"] <= 0 and rec["resultsCadastro"] <= 0 and rec["resultsLanding"] <= 0:
+#             continue
+#         rec["resultsCadastro"] = round(rec["resultsCadastro"], 2)
+#         rec["resultsLanding"] = round(rec["resultsLanding"], 2)
+#         rec["conversions"] = round(rec["conversions"], 2)
+#         out.append(rec)
+#     out.sort(key=lambda row: row["spend"], reverse=True)
+#     return out
 
 
 def parse_google_ads() -> list[dict]:
@@ -590,8 +712,6 @@ def iso_date(value) -> str | None:
 
 
 def parse_copart_xlsx() -> dict:
-    import pandas as pd
-
     path = find_raw("copart_dashboard-leiloes")
     daily_df = pd.read_excel(path, sheet_name="Entrantes e Habilitados", header=None)
     daily: list[dict] = []
@@ -696,6 +816,12 @@ def parse_copart_xlsx() -> dict:
 
 
 def main() -> None:
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+
+    # 1. Puxa do Supabase os dados da Meta
+    meta_campaigns = parse_meta() + parse_google()
+    meta_creatives = parse_meta_ads() + parse_google_ads()
+
     campaigns = parse_meta() + parse_google()
     creatives = parse_meta_ads() + parse_google_ads()
     excel = parse_copart_xlsx()
@@ -720,6 +846,8 @@ def main() -> None:
         "googleQuarterly": parse_google_quarterly(),
         "campaigns": campaigns,
         "creatives": creatives,
+        "new_campaigns": meta_campaigns,
+        "new_creatives": meta_creatives,
     }
     OUT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
     spend = sum(c["spend"] for c in campaigns)
