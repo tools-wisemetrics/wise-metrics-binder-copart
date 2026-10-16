@@ -844,8 +844,8 @@ def main() -> None:
         "ga4": parse_ga4(),
         "ga4PaidKeyEvents": parse_ga4_paid_download(),
         "googleQuarterly": parse_google_quarterly(),
-        "campaigns": campaigns,
-        "creatives": creatives,
+        "campaigns": meta_campaigns,
+        "creatives": meta_creatives,
         "new_campaigns": meta_campaigns,
         "new_creatives": meta_creatives,
     }
