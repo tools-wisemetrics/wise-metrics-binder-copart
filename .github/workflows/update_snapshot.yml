@@ -1,0 +1,43 @@
+name: Update Snapshot and Deploy to Vercel
+
+on:
+  schedule:
+    # Roda todos os dias às 07:00 UTC (04:00 Brasília), 1 hora após o Airbyte
+    - cron: '0 7 * * *'
+  workflow_dispatch: # Permite disparar manualmente pelo botão "Run workflow"
+
+# 1. Dá permissão para o bot salvar os arquivos no repositório
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          pip install supabase pandas openpyxl python-dotenv
+
+      - name: Executar script de geração do snapshot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python scripts/ingest-raw.py
+
+      - name: Fazer commit e push do snapshot atualizado
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add src/lib/data/raw-snapshot.json
+
+          # 3. [skip ci] removido. Assim que o push acontecer, a Vercel vai gerar o novo deploy!
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update raw-snapshot.json" && git push)
