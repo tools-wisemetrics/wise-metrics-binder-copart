@@ -250,7 +250,7 @@ def parse_visao_geral_midia() -> list[dict]:
         ctr = float(row.get("ctr") or 0.0)
         cpc = float(row.get("cpc") or 0.0)
         cpm = float(row.get("cpm") or 0.0)
-        cpp = float(row.get("cpp") or 0.0)
+        cpa = float(row.get("cpa") or 0.0)
 
         # 4. Filtro: ignora linhas sem nenhuma atividade real
         if investimento <= 0 and impressoes <= 0 and conversoes <= 0:
@@ -272,7 +272,7 @@ def parse_visao_geral_midia() -> list[dict]:
                 "cpc": round(cpc, 2),
                 "cpm": round(cpm, 2),
                 "ctr": round(ctr, 4),
-                "cpp": round(cpp, 2),
+                "cpa": round(cpa, 2),
             }
         )
 

@@ -12,9 +12,11 @@ import type {
 } from '@/lib/data/types';
 import { Database, ShieldCheck, TrendingUp, Filter, BarChart2 } from 'lucide-react';
 
+// PRecisa alterar, para Meta Ads e Google ADs  
 const CHANNELS = ['Paid Search', 'Cross-network', 'Paid Other', 'Paid Social'] as const;
 type ChannelName = (typeof CHANNELS)[number];
 
+// Alterar aqui tbm os eventos do filtro
 const EVENTS = [
   'RD Popup e WhatsApp',
   'sign_in',
@@ -24,7 +26,8 @@ const EVENTS = [
   'lead_vmc',
 ] as const;
 type EventName = (typeof EVENTS)[number];
-
+// Aqui tbm mudar para Impressoes e conversoes apenas que serão linha com área. MAs também quero uma linha diferente
+// que tenha o INvestimento como no dash do cloud
 const CH_COLORS: Record<ChannelName, string> = {
   'Paid Search': '#3b82f6',
   'Cross-network': '#8b5cf6',
@@ -32,13 +35,14 @@ const CH_COLORS: Record<ChannelName, string> = {
   'Paid Social': '#00b8cf',
 };
 
+// Esse sessions na verdade sera impressions
 const SESSIONS: Record<ChannelName, number> = {
   'Paid Search': 710990,
   'Cross-network': 216637,
   'Paid Other': 169666,
   'Paid Social': 36471,
 };
-
+// Deixar totalmente com variaveis dinamicas  
 const DATA: Record<ChannelName, Record<EventName, number>> = {
   'Paid Search': {
     'RD Popup e WhatsApp': 73607,
@@ -85,8 +89,8 @@ const INVEST: Record<ChannelName, number> = {
   'Paid Social': TM,
 };
 
-// criar um array que contenha as semanas de acordo com o new_visao_geral que transforme a date_start em weeks
-// e que responda ao filtro de data no começo
+// criar um array que contenha os dias de acordo com o new_visao_geral 
+// e que responda ao filtro de data no começo. SEE for possivel ter alguma funcao que troque de dia para semana
 const WEEKS = ['01–07 Ago', '08–14 Ago', '15–21 Ago', '22–28 Ago', '29–31 Ago']; 
 // apagar essa tristeza aqui
 const WW = [0.215, 0.235, 0.245, 0.21, 0.095];
