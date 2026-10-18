@@ -168,6 +168,8 @@ def parse_meta() -> list[dict]:
 
         campaigns.append({
             "source": "meta",
+            "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+            "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
             "name": name,
             "adGroup": None,
             "unit": classify_unit(name),
@@ -300,6 +302,8 @@ def parse_google() -> list[dict]:
         campaigns.append(
             {
                 "source": "google",
+                "dateStart": None,
+                "dateEnd": None,
                 "name": name,
                 "adGroup": ad_group,
                 "unit": classify_unit(name, ad_group),
@@ -466,7 +470,12 @@ def parse_meta_ads() -> list[dict]:
             continue
 
         spend = float(row.get("Amount spent (BRL)") or 0.0)
+        reach = float(row.get("Reach)") or 0.0)
         impressions = int(row.get("Impressions") or 0)
+        conversions = int(row.get("conversoes") or 0)
+        clicks = int(row.get("clicks") or 0)
+        ctr = float(row.get("ctr") or 0.0)
+        cpr = float(row.get("Cost per purchase (BRL)") or 0.0)
         purchases = float(row.get("Purchases") or 0.0)
         key = (name, ad_set)
         
@@ -474,6 +483,8 @@ def parse_meta_ads() -> list[dict]:
         if rec is None:
             rec = {
                 "id": f"meta-{len(merged) + 1}",
+                "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+                "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
                 "source": "meta",
                 "name": name,
                 "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
@@ -488,23 +499,25 @@ def parse_meta_ads() -> list[dict]:
                 "headlines": [],
                 "descriptions": [],
                 "hasImageIds": False,
-                "spend": 0.0,
-                "impressions": 0,
-                "reach": 0,
-                "clicks": 0,
-                "ctr": 0.0,
+                "spend": spend,
+                "impressions": impressions,
+                "reach": reach,
+                "clicks": clicks,
+                "ctr": ctr,
                 "resultsCadastro": 0.0,
                 "resultsLanding": 0.0,
                 "conversas": 0,
-                "conversions": 0.0,
+                "conversions": conversions,
+                "cpr": cpr,
+                		
             }
             merged[key] = rec
 
-        rec["spend"] = max(rec["spend"], round(spend, 2))
-        rec["impressions"] = max(rec["impressions"], impressions)
-        rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
+        # rec["spend"] = max(rec["spend"], round(spend, 2))
+        # rec["impressions"] = max(rec["impressions"], impressions)
+        # rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
         rec["conversas"] = max(rec["conversas"], int(row.get("Total messaging contacts") or 0))
-        rec["conversions"] += purchases
+        # rec["conversions"] += purchases
 
     out = [r for r in merged.values() if r["spend"] > 0 or r["impressions"] > 0 or r["conversions"] > 0]
     out.sort(key=lambda r: r["spend"], reverse=True)
@@ -888,11 +901,18 @@ def main() -> None:
     creatives = parse_meta_ads() + parse_google_ads()
     excel = parse_copart_xlsx()
     daily = excel["copartDaily"]
+    visao_geral = parse_visao_geral_midia()
+    dates_start = [r["date_start"] for r in visao_geral if r.get("date_start")]
+    dates_end = [r["date_end"] for r in visao_geral if r.get("date_end")]
+    media_start = min(dates_start) if dates_start else "2026-08-01"
+    media_end = max(dates_end) if dates_end else "2026-08-31"
+
+
     snapshot = {
         "origin": "weekly_report",
-        "originLabel": "Meta + GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
-        "mediaStart": "2026-08-01",
-        "mediaEnd": "2026-08-31",
+        "originLabel": "Meta Atualizado · GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
+        "mediaStart": media_start,
+        "mediaEnd": media_end,
         "copartStart": daily[0]["date"] if daily else "2026-09-01",
         "copartEnd": daily[-1]["date"] if daily else "2026-09-13",
         "files": sorted(
