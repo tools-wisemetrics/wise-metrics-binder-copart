@@ -2,16 +2,18 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { InfoTip } from '@/components/layout/info-tip';
-import { CardWrapper } from '@/components/layout/page-header';
-import { formatBRL, formatNumberFull, formatPercentage } from '@/lib/utils/formatters';
+import { Database, ShieldCheck, TrendingUp, Filter, BarChart2 } from 'lucide-react';
+
+import { formatBRL, formatNumberRounded, formatPercentage } from '@/lib/utils/formatters';
 import type {
   PaidMediaEventsReport,
   OverviewKPIs,
   ChannelPerformance,
   MediaEfficiencyRow,
 } from '@/lib/data/types';
-import { Database, ShieldCheck, TrendingUp, Filter, BarChart2 } from 'lucide-react';
+
 import { NewVisaoGeralMidia } from '@/lib/data/raw-data';
+import { DailyLineChart } from './daily-line-chart';
 
 // PRecisa alterar, para Meta Ads e Google ADs
 const CHANNEL_NAMES = ['Meta Ads', 'Google Ads'] as const;
@@ -27,73 +29,13 @@ const CHANNEL_COLORS: Record<ChannelName, string> = {
   'Meta Ads': '#3b82f6',
   'Google Ads': '#8b5cf6',
 };
-
-// Esse sessions na verdade sera impressions
-const SESSIONS_BY_CHANNEL: Record<ChannelName, number> = {
-  'Meta Ads': 8000,
-  'Google Ads': 4000,
-};
-// Deixar totalmente com variaveis dinamicas
-const EVENTS_BY_CHANNEL: Record<ChannelName, Record<EventName, number>> = {
-  'Meta Ads': {
-    cadastro_site: 868,
-    lead_vmc: 258,
-    login_site: 123,
-  },
-  'Google Ads': {
-    cadastro_site: 245,
-    lead_vmc: 225,
-    login_site: 50,
-  },
-};
-
-const TOTAL_INVESTMENT = 22000;
-const TOTAL_SESSIONS = SESSIONS_BY_CHANNEL['Meta Ads'] + SESSIONS_BY_CHANNEL['Google Ads'];
-
-const INVESTMENT_BY_CHANNEL: Record<ChannelName, number> = {
-  'Meta Ads': TOTAL_INVESTMENT * (SESSIONS_BY_CHANNEL['Meta Ads'] / TOTAL_SESSIONS),
-  'Google Ads': TOTAL_INVESTMENT * (SESSIONS_BY_CHANNEL['Google Ads'] / TOTAL_SESSIONS),
-};
-
-// criar um array que contenha os dias de acordo com o new_visao_geral
-// e que responda ao filtro de data no começo. SEE for possivel ter alguma funcao que troque de dia para semana
-const WEEK_LABELS = ['01–07 Ago', '08–14 Ago', '15–21 Ago', '22–28 Ago', '29–31 Ago'];
-// apagar essa tristeza aqui
-const WEEK_WEIGHTS = [0.215, 0.235, 0.245, 0.21, 0.095];
-
-// provavelemte apagar pq esta fazendo o proporcional
-function distributeAcrossWeeks(monthlyTotal: number, seed: number): number[] {
-  return WEEK_WEIGHTS.map((weight, weekIndex) => {
-    const jitter = 1 + Math.sin(weekIndex * 2.7 + seed * 0.0001) * 0.06;
-    return Math.round(monthlyTotal * weight * jitter);
-  });
-}
-
-// Pre-compute weekly datasets
-const WEEKLY_EVENTS: Record<string, Record<string, number[]>> = {};
-const WEEKLY_SESSIONS: Record<string, number[]> = {};
-const WEEKLY_INVESTMENT: Record<string, number[]> = {};
-
-CHANNEL_NAMES.forEach((channelName) => {
-  WEEKLY_EVENTS[channelName] = {};
-  EVENT_NAMES.forEach((eventName) => {
-    const monthlyEvents = EVENTS_BY_CHANNEL[channelName][eventName];
-    WEEKLY_EVENTS[channelName][eventName] = distributeAcrossWeeks(monthlyEvents, monthlyEvents);
-  });
-  WEEKLY_SESSIONS[channelName] = distributeAcrossWeeks(
-    SESSIONS_BY_CHANNEL[channelName],
-    SESSIONS_BY_CHANNEL[channelName] * 1.3,
-  );
-  WEEKLY_INVESTMENT[channelName] = WEEK_WEIGHTS.map((weight) => INVESTMENT_BY_CHANNEL[channelName] * weight);
-});
-
 interface PaidMediaViewProps {
   paidEvents: PaidMediaEventsReport;
   kpis: OverviewKPIs;
   channelPerf: ChannelPerformance[];
   mediaEfficiency: MediaEfficiencyRow[];
   showFooter?: boolean;
-  paidEventsOK: NewVisaoGeralMidia[];
+  paidEventsOK?: NewVisaoGeralMidia[];
 }
 
 export function PaidMediaView({
@@ -102,33 +44,30 @@ export function PaidMediaView({
   channelPerf,
   mediaEfficiency,
   showFooter,
-  paidEventsOK,
+  paidEventsOK = [],
 }: PaidMediaViewProps) {
   const [selectedChannels, setSelectedChannels] = useState<Set<ChannelName>>(new Set(CHANNEL_NAMES));
   const [selectedEvents, setSelectedEvents] = useState<Set<EventName>>(new Set(EVENT_NAMES));
 
-  const chartRef = useRef<HTMLDivElement>(null);
-  const [chartDimensions, setChartDimensions] = useState({ width: 800, height: 320 });
+  const filterPaidEvents = (
+    data: NewVisaoGeralMidia[],
+    channels: Set<ChannelName>,
+    events: Set<EventName>,
+  ): NewVisaoGeralMidia[] => {
+    return data.filter(
+      // "Essa linha pertence a uma das plataformas que estão selecionadas?"
+      (row) => channels.has(row.plataforma as ChannelName) && events.has(row.evento as EventName),
+    );
+  };
 
-  // Scale factor from dataService if filter active
-  const dataScale = paidEvents.scale > 0 ? paidEvents.scale : 1;
+  const filteredPaidEvents = useMemo(
+    () => filterPaidEvents(paidEventsOK, selectedChannels, selectedEvents),
+    [paidEventsOK, selectedChannels, selectedEvents],
+  );
 
-  // Update chart width on resize
-  useEffect(() => {
-    const updateSize = () => {
-      if (chartRef.current) {
-        setChartDimensions({
-          width: chartRef.current.offsetWidth || 800,
-          height: 320,
-        });
-      }
-    };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-
+  // ==========================================
   // Filter handlers
+  // ==========================================
   const toggleChannel = (channelName: ChannelName) => {
     setSelectedChannels((previous) => {
       const next = new Set(previous);
@@ -156,103 +95,11 @@ export function PaidMediaView({
   const selectAllChannels = () => setSelectedChannels(new Set(CHANNEL_NAMES));
   const selectAllEvents = () => setSelectedEvents(new Set(EVENT_NAMES));
 
-  // Compute aggregated dataset based on selection and data scale
-  const aggregates = useMemo(() => {
-    let totalSessions = 0;
-    let totalEvents = 0;
-    let totalInvestment = 0;
-    const weeklyEvents = [0, 0, 0, 0, 0];
-    const weeklySessions = [0, 0, 0, 0, 0];
-    const weeklyInvestment = [0, 0, 0, 0, 0];
-    const perChannel: Record<
-      string,
-      {
-        events: number;
-        sessions: number;
-        investment: number;
-        weeklyEvents: number[];
-        weeklySessions: number[];
-        weeklyInvestment: number[];
-      }
-    > = {};
-    const perEvent: Record<string, { events: number; sessions: number; investment: number }> = {};
-
-    selectedChannels.forEach((channelName) => {
-      let channelEvents = 0;
-      const channelWeeklyEvents = [0, 0, 0, 0, 0];
-      selectedEvents.forEach((eventName) => {
-        const scaledEvents = Math.round(EVENTS_BY_CHANNEL[channelName][eventName] * dataScale);
-        channelEvents += scaledEvents;
-        totalEvents += scaledEvents;
-        WEEKLY_EVENTS[channelName][eventName].forEach((weekValue, weekIndex) => {
-          const scaledWeekValue = Math.round(weekValue * dataScale);
-          weeklyEvents[weekIndex] += scaledWeekValue;
-          channelWeeklyEvents[weekIndex] += scaledWeekValue;
-        });
-        if (!perEvent[eventName]) perEvent[eventName] = { events: 0, sessions: 0, investment: 0 };
-        perEvent[eventName].events += scaledEvents;
-      });
-
-      const channelSessions = Math.round(SESSIONS_BY_CHANNEL[channelName] * dataScale);
-      const channelInvestment = INVESTMENT_BY_CHANNEL[channelName] * dataScale;
-
-      totalSessions += channelSessions;
-      totalInvestment += channelInvestment;
-
-      WEEKLY_SESSIONS[channelName].forEach(
-        (weekValue, weekIndex) => (weeklySessions[weekIndex] += Math.round(weekValue * dataScale)),
-      );
-      WEEKLY_INVESTMENT[channelName].forEach(
-        (weekValue, weekIndex) => (weeklyInvestment[weekIndex] += weekValue * dataScale),
-      );
-
-      perChannel[channelName] = {
-        events: channelEvents,
-        sessions: channelSessions,
-        investment: channelInvestment,
-        weeklyEvents: channelWeeklyEvents,
-        weeklySessions: WEEKLY_SESSIONS[channelName].map((weekValue) => Math.round(weekValue * dataScale)),
-        weeklyInvestment: WEEKLY_INVESTMENT[channelName].map((weekValue) => weekValue * dataScale),
-      };
-    });
-
-    Object.keys(perEvent).forEach((eventName) => {
-      perEvent[eventName].sessions = totalSessions;
-      perEvent[eventName].investment = totalInvestment;
-    });
-
-    return {
-      totalSessions,
-      totalEvents,
-      totalInvestment,
-      weeklyEvents,
-      weeklySessions,
-      weeklyInvestment,
-      perChannel,
-      perEvent,
-    };
-  }, [selectedChannels, selectedEvents, dataScale]);
-
-  let maxEventsValue = Math.max(...aggregates.weeklyEvents) * 1.15;
-  if (maxEventsValue === 0) maxEventsValue = 1;
-
-  // Investimento (R$) usa eixo secundário à direita por ter escala diferente dos eventos
-  let maxInvestmentValue = Math.max(...aggregates.weeklyInvestment) * 1.15;
-  if (maxInvestmentValue === 0) maxInvestmentValue = 1;
-
-  const filteredEvents = useMemo(
-    () =>
-      paidEventsOK.filter(
-        (row) => selectedChannels.has(row.plataforma) && selectedEvents.has(row.evento as EventName),
-      ),
-    [paidEventsOK, selectedChannels, selectedEvents],
-  );
-
   const sumBy = (field: 'impressoes' | 'conversoes' | 'investimento' | 'cpa' | 'ctr') =>
-    filteredEvents.reduce((sum, row) => sum + row[field], 0);
+    filteredPaidEvents.reduce((sum, row) => sum + (row[field] ?? 0), 0);
 
   const averageBy = (field: 'cpa' | 'ctr') =>
-    filteredEvents.length === 0 ? 0 : Number((sumBy(field) / filteredEvents.length).toFixed(2));
+    filteredPaidEvents.length === 0 ? 0 : Number((sumBy(field) / filteredPaidEvents.length).toFixed(2));
 
   const getTotalImpressions = () => sumBy('impressoes');
 
@@ -261,17 +108,13 @@ export function PaidMediaView({
   const getTotalInvestment = () => sumBy('investimento');
 
   const getConversionsTax = (conversion: number, impression: number) => {
-    if (impression === 0) return '0.00%';
-    return ((conversion / impression) * 100).toFixed(2) + '%';
+    if (impression === 0) return 0;
+    return (conversion / impression) * 100;
   };
 
   const getCPA = () => averageBy('cpa');
 
-  const getCTR = () => averageBy('ctr') + '%';
-
-  useEffect(() => {
-    console.log('Total Impressions:', { selectedChannels, selectedEvents });
-  }, [selectedEvents, selectedChannels]);
+  const getCTR = () => averageBy('ctr');
 
   return (
     <div className='space-y-6'>
@@ -373,7 +216,9 @@ export function PaidMediaView({
         <div className='rounded-2xl border border-[#dfe6ee] bg-white p-4 shadow-sm'>
           <p className='text-[10px] font-bold uppercase tracking-wider text-[#6c7685] mb-1'>Impressões</p>
           {/* <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{formatCurrency(costPerEvent)}</p> */}
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{getTotalImpressions()}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
+            {formatNumberRounded(getTotalImpressions())}
+          </p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Soma dos canais</p>
         </div>
         {/* Impressões */}
@@ -383,7 +228,9 @@ export function PaidMediaView({
           <p className='text-[10px] font-bold uppercase tracking-wider text-[#6c7685] mb-1'>
             Eventos disparados
           </p>
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{getTotalConversions()}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
+            {formatNumberRounded(getTotalConversions())}
+          </p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'></p>
         </div>
         {/* Eventos*/}
@@ -396,7 +243,7 @@ export function PaidMediaView({
           </p> */}
 
           <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
-            {getConversionsTax(getTotalConversions(), getTotalImpressions())}
+            {formatPercentage(getConversionsTax(getTotalConversions(), getTotalImpressions()))}
           </p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Eventos / Impressões</p>
         </div>
@@ -404,7 +251,7 @@ export function PaidMediaView({
         {/* CPA */}
         <div className='rounded-2xl border border-[#dfe6ee] bg-white p-4 shadow-sm'>
           <p className='text-[10px] font-bold uppercase tracking-wider text-[#6c7685] mb-1'>CPA</p>
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{getCPA()}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{formatBRL(getCPA())}</p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Custo por evento</p>
         </div>
 
@@ -414,17 +261,21 @@ export function PaidMediaView({
           {/* <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
             {formatCurrency(costPerSession)}
           </p> */}
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{getCTR()}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{formatPercentage(getCTR())}</p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Taxa de cliques por impressões</p>
         </div>
 
         {/* Investimento */}
         <div className='rounded-2xl border border-[#dfe6ee] bg-white p-4 shadow-sm'>
           <p className='text-[10px] font-bold uppercase tracking-wider text-[#6c7685] mb-1'>Investimento</p>
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{getTotalInvestment()}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
+            {formatBRL(getTotalInvestment())}
+          </p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Mídia paga acumulada</p>
         </div>
       </div>
+
+      <DailyLineChart data={filteredPaidEvents} />
 
       {/* Footer Banner matching copart-dashboard governance cards */}
       {showFooter && (
