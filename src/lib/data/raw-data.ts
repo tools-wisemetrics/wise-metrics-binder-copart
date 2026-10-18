@@ -162,6 +162,7 @@ interface RawSnapshot {
   };
   campaigns: RawCampaign[];
   creatives: Omit<CreativePiece, "channel">[];
+  new_visao_geral_midias?: NewVisaoGeralMidia[];
 }
 
 export const rawSnapshot = snapshotJson as RawSnapshot;
