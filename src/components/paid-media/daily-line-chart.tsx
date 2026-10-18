@@ -79,7 +79,7 @@ function DailyChartTooltip({ active, payload, label }: CustomTooltipProps) {
             <span className='h-2.5 w-2.5 rounded-full bg-[#00b8cf]' />
             <span>Conversões:</span>
           </div>
-          <span className='font-black text-white'>{formatNumberFull(data.conversions)} un</span>
+          <span className='font-black text-white'>{formatNumberRounded(data.conversions)}</span>
         </div>
 
         {/* Investimento */}

@@ -20,10 +20,12 @@ export function formatBRL(value: number): string {
  */
 export function formatNumber(value: number): string {
   if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace('.', ',')}M`;
+    const formatted = (value / 1_000_000).toFixed(1).replace('.', ',');
+    return `${formatted.endsWith(',0') ? formatted.slice(0, -2) : formatted}M`;
   }
   if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}k`;
+    const formatted = (value / 1_000).toFixed(1).replace('.', ',');
+    return `${formatted.endsWith(',0') ? formatted.slice(0, -2) : formatted}k`;
   }
   return new Intl.NumberFormat('pt-BR').format(value);
 }

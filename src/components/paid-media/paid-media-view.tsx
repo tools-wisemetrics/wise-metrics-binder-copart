@@ -231,7 +231,7 @@ export function PaidMediaView({
           <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
             {formatNumberRounded(getTotalConversions())}
           </p>
-          <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'></p>
+          <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Eventos de conversão</p>
         </div>
         {/* Eventos*/}
 
@@ -251,7 +251,9 @@ export function PaidMediaView({
         {/* CPA */}
         <div className='rounded-2xl border border-[#dfe6ee] bg-white p-4 shadow-sm'>
           <p className='text-[10px] font-bold uppercase tracking-wider text-[#6c7685] mb-1'>CPA</p>
-          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>{formatBRL(getCPA())}</p>
+          <p className='text-2xl font-black text-[#0b1f3a] tracking-tight'>
+            {formatBRL(getTotalInvestment() / getTotalConversions())}
+          </p>
           <p className='text-[11px] font-semibold text-[#8aa4be] mt-1'>Custo por evento</p>
         </div>
 
