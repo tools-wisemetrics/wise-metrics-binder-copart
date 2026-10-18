@@ -61,6 +61,8 @@ export interface RawCampaign {
   resultType: string;
   conversas: number;
   newConversas: number;
+  dateStart?: string;
+  dateEnd?: string;
 }
 
 export interface NewVisaoGeralMidia {
@@ -186,13 +188,23 @@ const GA4_CHANNEL_LABEL: Record<string, string> = {
   "Organic Video": "Vídeo orgânico",
 };
 
-function mediaScale(filters: DashboardFilters): number {
-  return coverageScale(filters, rawSnapshot.mediaStart, rawSnapshot.mediaEnd, MEDIA_DAYS);
+// function mediaScale(filters: DashboardFilters): number {
+//   return coverageScale(filters, rawSnapshot.mediaStart, rawSnapshot.mediaEnd, MEDIA_DAYS);
+// }
+
+// function copartScale(filters: DashboardFilters): number {
+//   return coverageScale(filters, rawSnapshot.copartStart, rawSnapshot.copartEnd, COPART_DAYS);
+// }
+
+
+function mediaScale(_filters: DashboardFilters): number {
+  return 1;
 }
 
-function copartScale(filters: DashboardFilters): number {
-  return coverageScale(filters, rawSnapshot.copartStart, rawSnapshot.copartEnd, COPART_DAYS);
+function copartScale(_filters: DashboardFilters): number {
+  return 1;
 }
+
 
 function scaleMoney(value: number, scale: number): number {
   return Math.round(value * scale * 100) / 100;
@@ -503,7 +515,7 @@ export class RawExportDataService extends MockDataService {
         unit: "leilao_compra",
       },
       {
-        title: "Conversas — Select/Venda (mídia)",
+        title: "[EM BREVE] Conversas — Select/Venda (mídia)",
         current: conversas,
         target: convTarget,
         percentage: convTarget === 0 ? 0 : (conversas / convTarget) * 100,
@@ -513,7 +525,7 @@ export class RawExportDataService extends MockDataService {
         unit: "select_venda",
       },
       {
-        title: "Leads — Copart Select",
+        title: "[EM BREVE] Leads — Copart Select",
         current: select.leads,
         target: leadsTarget,
         percentage: leadsTarget === 0 ? 0 : (select.leads / leadsTarget) * 100,
@@ -523,7 +535,7 @@ export class RawExportDataService extends MockDataService {
         unit: "select_venda",
       },
       {
-        title: "Vendas — Copart Select",
+        title: "[EM BREVE] Vendas — Copart Select",
         current: select.vendas,
         target: vendasTarget,
         percentage: vendasTarget === 0 ? 0 : (select.vendas / vendasTarget) * 100,
@@ -604,13 +616,13 @@ export class RawExportDataService extends MockDataService {
       const pageViews = scaleNumber(eventCount("page_view"), m);
       const official = hasCopart
         ? rateStages([
-            { label: "Entrantes Copart", value: entrantes, description: "Excel Copart — cadastro oficial da unidade" },
-            { label: "Habilitados Copart", value: habilitados, description: "Excel Copart — habilitação oficial da unidade" },
-          ])
+          { label: "Entrantes Copart", value: entrantes, description: "Excel Copart — cadastro oficial da unidade" },
+          { label: "Habilitados Copart", value: habilitados, description: "Excel Copart — habilitação oficial da unidade" },
+        ])
         : [
-            { label: "Cadastro GA4 (evento)", value: entrantes, description: "Evento cadastro_site ago/2026, site inteiro — não é Entrante Copart" },
-            { label: "Habilitados (estimado)", value: habilitados, description: "cadastro_site × taxa Copart 4.536/7.337 — não medido neste recorte" },
-          ];
+          { label: "Cadastro GA4 (evento)", value: entrantes, description: "Evento cadastro_site ago/2026, site inteiro — não é Entrante Copart" },
+          { label: "Habilitados (estimado)", value: habilitados, description: "cadastro_site × taxa Copart 4.536/7.337 — não medido neste recorte" },
+        ];
       return {
         type: "leilao",
         title: "Funil Leilão",
@@ -800,46 +812,91 @@ export class RawExportDataService extends MockDataService {
     if (filters.channel === "ALL") return table;
     return table.filter((row) => row.channelId === filters.channel);
   }
-
   async getCampaignScorecards(filters: DashboardFilters): Promise<CampaignScorecard[]> {
-    const m = mediaScale(filters);
-    return rawSnapshot.campaigns
+    // 1. Filtra as linhas de acordo com os filtros de tela e o período selecionado
+    const filteredRows = rawSnapshot.campaigns
       .filter((row) => filters.campaignType === "ALL" || row.unit === filters.campaignType)
       .filter((row) => filters.channel === "ALL" || row.source.toUpperCase() === filters.channel)
       .filter((row) => filters.campaign === "ALL" || campaignLabel(row) === filters.campaign)
       .filter((row) => filters.funnel === "ALL" || unitMatchesFunnel(row.unit, filters.funnel))
-      .map((row) => {
-        const spend = scaleMoney(row.spend, m);
-        const clicks = scaleNumber(row.clicks, m);
-        const impressions = scaleNumber(row.impressions, m);
-        const entrantes =
-          row.resultType === "cadastro" || row.resultType === "conversion"
-            ? scaleNumber(row.results, m)
-            : 0;
-        const conversas = row.resultType === "messaging" ? scaleNumber(row.results, m) : row.conversas ? scaleNumber(row.conversas, m) : null;
-        const nativeResults = scaleNumber(row.results, m);
+      .filter((row) => {
+        if (row.source === "google") return true;
+        if (!row.dateStart || !row.dateEnd) return true;
+        return overlapDays(filters.dateRange.start, filters.dateRange.end, row.dateStart, row.dateEnd) > 0;
+      });
+
+    // 2. Agrupa por campanha somando as métricas dos dias filtrados
+    const grouped = new Map<string, {
+      name: string;
+      channel: Channel;
+      unit: CampaignScorecard["campaign_type"];
+      spend: number;
+      clicks: number;
+      impressions: number;
+      results: number;
+      conversas: number;
+      resultType: string;
+      status: CampaignScorecard["status"];
+    }>();
+
+    for (const row of filteredRows) {
+      const name = campaignLabel(row);
+      const key = `${row.source}_${row.unit}_${name}`;
+      const current = grouped.get(key) ?? {
+        name,
+        channel: (row.source === "meta" ? "META" : "GOOGLE") as Channel,
+        unit: row.unit,
+        spend: 0,
+        clicks: 0,
+        impressions: 0,
+        results: 0,
+        conversas: 0,
+        resultType: row.resultType,
+        status: campaignStatus(row),
+      };
+
+      current.spend += row.spend;
+      current.clicks += row.clicks;
+      current.impressions += row.impressions;
+      current.results += row.results;
+      current.conversas += (row.resultType === "messaging" ? row.results : row.conversas || 0);
+
+      grouped.set(key, current);
+    }
+
+    // 3. Monta o resultado final com as métricas consolidadas
+    return Array.from(grouped.values())
+      .map((g) => {
+        const isCadastro = g.resultType === "cadastro" || g.resultType === "conversion";
+        const entrantes = isCadastro ? Math.round(g.results) : 0;
+        const nativeResults = Math.round(g.results);
+        const spend = Math.round(g.spend * 100) / 100;
+        const clicks = Math.round(g.clicks);
+        const impressions = Math.round(g.impressions);
+
         return {
-          campaign_name: campaignLabel(row),
-          channel: (row.source === "meta" ? "META" : "GOOGLE") as Channel,
-          campaign_type: row.unit,
+          campaign_name: g.name,
+          channel: g.channel,
+          campaign_type: g.unit,
           impressions,
           clicks,
           ctr: impressions === 0 ? 0 : (clicks / impressions) * 100,
           entrantes,
-          habilitados: row.resultType === "cadastro" ? scaleNumber(row.results * HIST_HAB_RATE, m) : null,
-          taxa_habilitacao: row.resultType === "cadastro" ? HIST_HAB_RATE * 100 : null,
+          habilitados: g.resultType === "cadastro" ? Math.round(g.results * HIST_HAB_RATE) : null,
+          taxa_habilitacao: g.resultType === "cadastro" ? HIST_HAB_RATE * 100 : null,
           spend,
           cpc: clicks === 0 ? null : spend / clicks,
           custo_por_entrante: nativeResults === 0 ? 0 : spend / nativeResults,
-          conversas,
-          status: campaignStatus(row),
+          conversas: g.conversas > 0 ? Math.round(g.conversas) : null,
+          status: g.status,
           owner: MEDIA_OWNER,
-          resultLabel: ACCOUNT_RESULT_LABEL[row.resultType] ?? "Resultado da conta",
+          resultLabel: ACCOUNT_RESULT_LABEL[g.resultType] ?? "Resultado da conta",
           nativeResults,
         };
       })
       .sort((a, b) => b.spend - a.spend);
   }
+
 
   async getAttributionComparison(filters: DashboardFilters): Promise<AttributionComparison[]> {
     const cards = await this.getCampaignScorecards(filters);
@@ -922,19 +979,19 @@ export class RawExportDataService extends MockDataService {
       },
       ...(whats && whats.results > 0
         ? [
-            {
-              id: "alert-select-cpa",
-              severity: "info" as const,
-              title: "CPA de conversas Select/Venda",
-              description: `R$ ${(whats.spend / whats.results).toFixed(2)} por conversa Meta (${whats.results} mensagens, R$ ${whats.spend.toFixed(2)}). Lead CRM do Excel é outra métrica.`,
-              metric: "CPA conversa",
-              expected: "Custo por conversa sob revisão",
-              action: "Não misturar conversa Meta com lead Copart Select",
-              responsavel: MEDIA_OWNER,
-              timestamp: "2026-08-31T11:00:00Z",
-              isMedia: true,
-            },
-          ]
+          {
+            id: "alert-select-cpa",
+            severity: "info" as const,
+            title: "CPA de conversas Select/Venda",
+            description: `R$ ${(whats.spend / whats.results).toFixed(2)} por conversa Meta (${whats.results} mensagens, R$ ${whats.spend.toFixed(2)}). Lead CRM do Excel é outra métrica.`,
+            metric: "CPA conversa",
+            expected: "Custo por conversa sob revisão",
+            action: "Não misturar conversa Meta com lead Copart Select",
+            responsavel: MEDIA_OWNER,
+            timestamp: "2026-08-31T11:00:00Z",
+            isMedia: true,
+          },
+        ]
         : []),
     ];
   }
@@ -1410,8 +1467,11 @@ export class RawExportDataService extends MockDataService {
       channels: [],
     };
     if (!extract) return empty;
+    // const overlap = overlapDays(filters.dateRange.start, filters.dateRange.end, extract.start, extract.end);
+    // const scale = overlap / Math.max(extract.days, 1);
     const overlap = overlapDays(filters.dateRange.start, filters.dateRange.end, extract.start, extract.end);
-    const scale = overlap / Math.max(extract.days, 1);
+    const scale = 1;
+
     const allowed = paidChannelsForFilter(filters.channel);
     const rows = extract.rows.filter((row) => (allowed === null ? true : allowed.includes(row.channel)));
     const apply = (value: number) => scaleNumber(value, scale);
@@ -1485,9 +1545,14 @@ export class RawExportDataService extends MockDataService {
     };
     if (!extract) return empty;
     if (filters.channel !== "ALL" && filters.channel !== "GOOGLE") return empty;
+
+    // const overlap = overlapDays(filters.dateRange.start, filters.dateRange.end, extract.start, extract.end);
+    // if (overlap === 0) return empty;
+    // const scale = overlap / Math.max(extract.days, 1);
+
     const overlap = overlapDays(filters.dateRange.start, filters.dateRange.end, extract.start, extract.end);
-    if (overlap === 0) return empty;
-    const scale = overlap / Math.max(extract.days, 1);
+    const scale = 1;
+
     const allowed = extract.campaigns.filter((row) => googleUnitAllowed(row.unit, filters));
     if (allowed.length === 0) return { ...empty, overlapDays: overlap, scale, sourceDays: extract.days };
 
@@ -1518,30 +1583,30 @@ export class RawExportDataService extends MockDataService {
 
     const byTypeSource = filtered
       ? Array.from(
-          allowed.reduce((acc, row) => {
-            const current = acc.get(row.campaignType) ?? {
-              spend: 0,
-              spendPrev: 0,
-              conversions: 0,
-              conversionsPrev: 0,
-              clicks: 0,
-              clicksPrev: 0,
-            };
-            current.spend += row.spend;
-            current.spendPrev += row.spendPrev;
-            current.conversions += row.conversions;
-            current.conversionsPrev += row.conversionsPrev;
-            current.clicks += row.clicks;
-            current.clicksPrev += row.clicksPrev;
-            acc.set(row.campaignType, current);
-            return acc;
-          }, new Map<string, { spend: number; spendPrev: number; conversions: number; conversionsPrev: number; clicks: number; clicksPrev: number }>())
-        ).map(([label, row]) => ({
-          label,
-          spend: { current: row.spend, previous: row.spendPrev },
-          conversions: { current: row.conversions, previous: row.conversionsPrev },
-          clicks: { current: row.clicks, previous: row.clicksPrev },
-        }))
+        allowed.reduce((acc, row) => {
+          const current = acc.get(row.campaignType) ?? {
+            spend: 0,
+            spendPrev: 0,
+            conversions: 0,
+            conversionsPrev: 0,
+            clicks: 0,
+            clicksPrev: 0,
+          };
+          current.spend += row.spend;
+          current.spendPrev += row.spendPrev;
+          current.conversions += row.conversions;
+          current.conversionsPrev += row.conversionsPrev;
+          current.clicks += row.clicks;
+          current.clicksPrev += row.clicksPrev;
+          acc.set(row.campaignType, current);
+          return acc;
+        }, new Map<string, { spend: number; spendPrev: number; conversions: number; conversionsPrev: number; clicks: number; clicksPrev: number }>())
+      ).map(([label, row]) => ({
+        label,
+        spend: { current: row.spend, previous: row.spendPrev },
+        conversions: { current: row.conversions, previous: row.conversionsPrev },
+        clicks: { current: row.clicks, previous: row.clicksPrev },
+      }))
       : extract.byType;
 
     return {

@@ -168,6 +168,8 @@ def parse_meta() -> list[dict]:
 
         campaigns.append({
             "source": "meta",
+            "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+            "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
             "name": name,
             "adGroup": None,
             "unit": classify_unit(name),
@@ -300,6 +302,8 @@ def parse_google() -> list[dict]:
         campaigns.append(
             {
                 "source": "google",
+                "dateStart": None,
+                "dateEnd": None,
                 "name": name,
                 "adGroup": ad_group,
                 "unit": classify_unit(name, ad_group),
@@ -479,6 +483,8 @@ def parse_meta_ads() -> list[dict]:
         if rec is None:
             rec = {
                 "id": f"meta-{len(merged) + 1}",
+                "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+                "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
                 "source": "meta",
                 "name": name,
                 "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
@@ -895,11 +901,18 @@ def main() -> None:
     creatives = parse_meta_ads() + parse_google_ads()
     excel = parse_copart_xlsx()
     daily = excel["copartDaily"]
+    visao_geral = parse_visao_geral_midia()
+    dates_start = [r["date_start"] for r in visao_geral if r.get("date_start")]
+    dates_end = [r["date_end"] for r in visao_geral if r.get("date_end")]
+    media_start = min(dates_start) if dates_start else "2026-08-01"
+    media_end = max(dates_end) if dates_end else "2026-08-31"
+
+
     snapshot = {
         "origin": "weekly_report",
-        "originLabel": "Meta + GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
-        "mediaStart": "2026-08-01",
-        "mediaEnd": "2026-08-31",
+        "originLabel": "Meta Atualizado · GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
+        "mediaStart": media_start,
+        "mediaEnd": media_end,
         "copartStart": daily[0]["date"] if daily else "2026-09-01",
         "copartEnd": daily[-1]["date"] if daily else "2026-09-13",
         "files": sorted(
