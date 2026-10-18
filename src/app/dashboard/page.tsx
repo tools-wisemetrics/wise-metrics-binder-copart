@@ -1,6 +1,7 @@
 import { PageHeader, PageContent, SectionTitle, CardWrapper } from '@/components/layout/page-header';
 import { GoalCard } from '@/components/cards/goal-card';
 import { dataService } from '@/lib/data/data-service';
+import { getPaidMediaEventsOK } from '@/services/getData';
 import { filtersFromSearchParams } from '@/lib/page-filters';
 import { formatDateRangeLabel, hrefWithFilters } from '@/lib/filters';
 import type { SearchParamRecord } from '@/lib/filters';
@@ -22,15 +23,19 @@ export const metadata = {
 
 export default async function OverviewPage({ searchParams }: { searchParams: Promise<SearchParamRecord> }) {
   const filters = await filtersFromSearchParams(searchParams);
-  const [kpis, goals, mix, efficiency, paidEvents, googleQuarterly, channelPerf] = await Promise.all([
-    dataService.getOverviewKPIs(filters),
-    dataService.getGoalProgress(filters),
-    dataService.getTrafficMix(filters),
-    dataService.getMediaEfficiency(filters),
-    dataService.getPaidMediaEvents(filters),
-    dataService.getGoogleQuarterly(filters),
-    dataService.getChannelPerformance('leilao', filters),
-  ]);
+  const [kpis, goals, mix, efficiency, paidEvents, paidEventsOK, googleQuarterly, channelPerf] =
+    await Promise.all([
+      dataService.getOverviewKPIs(filters),
+      dataService.getGoalProgress(filters),
+      dataService.getTrafficMix(filters),
+      dataService.getMediaEfficiency(filters),
+
+      dataService.getPaidMediaEvents(filters),
+      getPaidMediaEventsOK(filters),
+
+      dataService.getGoogleQuarterly(filters),
+      dataService.getChannelPerformance('leilao', filters),
+    ]);
 
   // const owned = mix.filter((bucket) => bucket.id === 'direct' || bucket.id === 'organic');
   // const paid = mix.find((bucket) => bucket.id === 'paid');
@@ -177,6 +182,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           channelPerf={channelPerf}
           mediaEfficiency={efficiency}
           showFooter={false}
+          paidEventsOK={paidEventsOK}
         />
 
         <div className='mb-8' />

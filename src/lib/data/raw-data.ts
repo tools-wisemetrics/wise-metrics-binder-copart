@@ -63,6 +63,23 @@ export interface RawCampaign {
   newConversas: number;
 }
 
+export interface NewVisaoGeralMidia {
+  id: string;
+  plataforma: 'Google Ads' | 'Meta Ads';
+  date_start: string; // ISO "YYYY-MM-DD"
+  date_end: string; // ISO "YYYY-MM-DD"
+  evento: string; // ex.: "cadastro_site"
+  investimento: number; // R$
+  conversoes: number;
+  cliques: number;
+  impressoes: number;
+  alcance: number;
+  cpc: number; // custo por clique, R$
+  cpm: number; // custo por mil impressões, R$
+  ctr: number; // percentual, ex.: 46.3011 = 46,3%
+  cpa: number; // custo por aquisição, R$
+}
+
 interface RawSnapshot {
   origin: DataOrigin;
   originLabel: string;
