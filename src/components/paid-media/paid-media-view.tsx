@@ -85,9 +85,13 @@ const INVEST: Record<ChannelName, number> = {
   'Paid Social': TM,
 };
 
-const WEEKS = ['01–07 Ago', '08–14 Ago', '15–21 Ago', '22–28 Ago', '29–31 Ago'];
+// criar um array que contenha as semanas de acordo com o new_visao_geral que transforme a date_start em weeks
+// e que responda ao filtro de data no começo
+const WEEKS = ['01–07 Ago', '08–14 Ago', '15–21 Ago', '22–28 Ago', '29–31 Ago']; 
+// apagar essa tristeza aqui
 const WW = [0.215, 0.235, 0.245, 0.21, 0.095];
 
+// provavelemte apagar pq esta fazendo o proporcional
 function wk(m: number, seed: number): number[] {
   return WW.map((w, i) => {
     const j = 1 + Math.sin(i * 2.7 + seed * 0.0001) * 0.06;
@@ -120,6 +124,7 @@ const fK = (n: number) =>
 const fR = (n: number) => formatBRL(n);
 const fP = (n: number) => formatPercentage(n * 100, 2);
 
+// essa funcao provavelmente n vai funcionar - falar cmg
 function delta(curr: number, prev: number) {
   if (prev === 0 && curr === 0) return { pct: 0, cls: 'neutral', txt: '–' };
   if (prev === 0) return { pct: 100, cls: 'up', txt: 'novo' };

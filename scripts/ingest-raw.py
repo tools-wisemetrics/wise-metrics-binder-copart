@@ -220,6 +220,68 @@ def parse_meta() -> list[dict]:
 #     return campaigns
 
 
+# ==========================================
+# 1. VISAO GERAL MIDIA PAGA  (Direto da View)
+# ==========================================
+def parse_visao_geral_midia() -> list[dict]:
+    if not supabase:
+        return []
+
+    # Consulta todos os registros da tabela no Supabase
+    response = supabase.from_("vw_dashboard_eventos_midia_paga").select("*").execute()
+    rows = response.data or []
+
+    visao_geral_midia: list[dict] = []
+    for idx, row in enumerate(rows, start=1):
+        # 1. Identificadores, dimensões e datas
+        plataforma = str(row.get("plataforma") or "").strip()
+        date_start = str(row.get("date_start") or "").strip()
+        date_end = str(row.get("date_end") or "").strip()
+        evento = str(row.get("evento") or "").strip()
+
+        # 2. Métricas base
+        investimento = float(row.get("investimento") or 0.0)
+        impressoes = int(row.get("impressoes") or 0)
+        cliques = int(row.get("cliques") or 0)
+        conversoes = float(row.get("conversoes") or 0.0)
+        alcance = int(row.get("alcance") or 0)
+
+        # 3. Métricas derivadas (extraídas diretamente da coluna)
+        ctr = float(row.get("ctr") or 0.0)
+        cpc = float(row.get("cpc") or 0.0)
+        cpm = float(row.get("cpm") or 0.0)
+        cpp = float(row.get("cpp") or 0.0)
+
+        # 4. Filtro: ignora linhas sem nenhuma atividade real
+        if investimento <= 0 and impressoes <= 0 and conversoes <= 0:
+            continue
+
+        # 5. Adiciona o registro individual com todas as colunas
+        visao_geral_midia.append(
+            {
+                "id": f"visao_geral-{idx}",
+                "plataforma": plataforma,
+                "date_start": date_start,
+                "date_end": date_end,
+                "evento": evento,
+                "investimento": round(investimento, 2),
+                "conversoes": conversoes,
+                "cliques": cliques,
+                "impressoes": impressoes,
+                "alcance": alcance,
+                "cpc": round(cpc, 2),
+                "cpm": round(cpm, 2),
+                "ctr": round(ctr, 4),
+                "cpp": round(cpp, 2),
+            }
+        )
+
+    # Ordena cronologicamente por date_start
+    visao_geral_midia.sort(key=lambda r: r["date_start"], reverse=True)
+    return visao_geral_midia
+
+
+
 def parse_google() -> list[dict]:
     path = find_raw("google-ads_grupos")
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -848,6 +910,7 @@ def main() -> None:
         "creatives": meta_creatives,
         "new_campaigns": meta_campaigns,
         "new_creatives": meta_creatives,
+        "new_visao_geral_midias": parse_visao_geral_midia(),
     }
     OUT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
     spend = sum(c["spend"] for c in campaigns)
