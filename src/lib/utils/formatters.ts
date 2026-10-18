@@ -36,6 +36,24 @@ export function formatNumberFull(value: number): string {
 }
 
 /**
+ * Formata número com separador de milhar brasileiro (.)
+ * e arredonda casas decimais pela regra matemática padrão (>= 0.5 arredonda para cima, < 0.5 para baixo)
+ */
+export function formatNumberRounded(value: number, decimals: number = 0): string {
+  if (decimals === 0) {
+    return new Intl.NumberFormat('pt-BR', {
+      maximumFractionDigits: 0,
+    }).format(Math.round(value));
+  }
+  const factor = Math.pow(10, decimals);
+  const rounded = Math.round(value * factor) / factor;
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(rounded);
+}
+
+/**
  * Format percentage value
  */
 export function formatPercentage(value: number, decimals: number = 1): string {
