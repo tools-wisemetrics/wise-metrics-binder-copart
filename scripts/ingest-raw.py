@@ -466,7 +466,12 @@ def parse_meta_ads() -> list[dict]:
             continue
 
         spend = float(row.get("Amount spent (BRL)") or 0.0)
+        reach = float(row.get("Reach)") or 0.0)
         impressions = int(row.get("Impressions") or 0)
+        conversions = int(row.get("conversoes") or 0)
+        clicks = int(row.get("clicks") or 0)
+        ctr = float(row.get("ctr") or 0.0)
+        cpr = float(row.get("Cost per purchase (BRL)") or 0.0)
         purchases = float(row.get("Purchases") or 0.0)
         key = (name, ad_set)
         
@@ -488,23 +493,25 @@ def parse_meta_ads() -> list[dict]:
                 "headlines": [],
                 "descriptions": [],
                 "hasImageIds": False,
-                "spend": 0.0,
-                "impressions": 0,
-                "reach": 0,
-                "clicks": 0,
-                "ctr": 0.0,
+                "spend": spend,
+                "impressions": impressions,
+                "reach": reach,
+                "clicks": clicks,
+                "ctr": ctr,
                 "resultsCadastro": 0.0,
                 "resultsLanding": 0.0,
                 "conversas": 0,
-                "conversions": 0.0,
+                "conversions": conversions,
+                "cpr": cpr,
+                		
             }
             merged[key] = rec
 
-        rec["spend"] = max(rec["spend"], round(spend, 2))
-        rec["impressions"] = max(rec["impressions"], impressions)
-        rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
+        # rec["spend"] = max(rec["spend"], round(spend, 2))
+        # rec["impressions"] = max(rec["impressions"], impressions)
+        # rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
         rec["conversas"] = max(rec["conversas"], int(row.get("Total messaging contacts") or 0))
-        rec["conversions"] += purchases
+        # rec["conversions"] += purchases
 
     out = [r for r in merged.values() if r["spend"] > 0 or r["impressions"] > 0 or r["conversions"] > 0]
     out.sort(key=lambda r: r["spend"], reverse=True)
