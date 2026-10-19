@@ -168,6 +168,8 @@ def parse_meta() -> list[dict]:
 
         campaigns.append({
             "source": "meta",
+            "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+            "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
             "name": name,
             "adGroup": None,
             "unit": classify_unit(name),
@@ -220,6 +222,68 @@ def parse_meta() -> list[dict]:
 #     return campaigns
 
 
+# ==========================================
+# 1. VISAO GERAL MIDIA PAGA  (Direto da View)
+# ==========================================
+def parse_visao_geral_midia() -> list[dict]:
+    if not supabase:
+        return []
+
+    # Consulta todos os registros da tabela no Supabase
+    response = supabase.from_("vw_dashboard_eventos_midia_paga").select("*").execute()
+    rows = response.data or []
+
+    visao_geral_midia: list[dict] = []
+    for idx, row in enumerate(rows, start=1):
+        # 1. Identificadores, dimensões e datas
+        plataforma = str(row.get("plataforma") or "").strip()
+        date_start = str(row.get("date_start") or "").strip()
+        date_end = str(row.get("date_end") or "").strip()
+        evento = str(row.get("evento") or "").strip()
+
+        # 2. Métricas base
+        investimento = float(row.get("investimento") or 0.0)
+        impressoes = int(row.get("impressoes") or 0)
+        cliques = int(row.get("cliques") or 0)
+        conversoes = float(row.get("conversoes") or 0.0)
+        alcance = int(row.get("alcance") or 0)
+
+        # 3. Métricas derivadas (extraídas diretamente da coluna)
+        ctr = float(row.get("ctr") or 0.0)
+        cpc = float(row.get("cpc") or 0.0)
+        cpm = float(row.get("cpm") or 0.0)
+        cpa = float(row.get("cpa") or 0.0)
+
+        # 4. Filtro: ignora linhas sem nenhuma atividade real
+        if investimento <= 0 and impressoes <= 0 and conversoes <= 0:
+            continue
+
+        # 5. Adiciona o registro individual com todas as colunas
+        visao_geral_midia.append(
+            {
+                "id": f"visao_geral-{idx}",
+                "plataforma": plataforma,
+                "date_start": date_start,
+                "date_end": date_end,
+                "evento": evento,
+                "investimento": round(investimento, 2),
+                "conversoes": conversoes,
+                "cliques": cliques,
+                "impressoes": impressoes,
+                "alcance": alcance,
+                "cpc": round(cpc, 2),
+                "cpm": round(cpm, 2),
+                "ctr": round(ctr, 4),
+                "cpa": round(cpa, 2),
+            }
+        )
+
+    # Ordena cronologicamente por date_start
+    visao_geral_midia.sort(key=lambda r: r["date_start"], reverse=True)
+    return visao_geral_midia
+
+
+
 def parse_google() -> list[dict]:
     path = find_raw("google-ads_grupos")
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -238,6 +302,8 @@ def parse_google() -> list[dict]:
         campaigns.append(
             {
                 "source": "google",
+                "dateStart": None,
+                "dateEnd": None,
                 "name": name,
                 "adGroup": ad_group,
                 "unit": classify_unit(name, ad_group),
@@ -404,7 +470,12 @@ def parse_meta_ads() -> list[dict]:
             continue
 
         spend = float(row.get("Amount spent (BRL)") or 0.0)
+        reach = float(row.get("Reach)") or 0.0)
         impressions = int(row.get("Impressions") or 0)
+        conversions = int(row.get("conversoes") or 0)
+        clicks = int(row.get("clicks") or 0)
+        ctr = float(row.get("ctr") or 0.0)
+        cpr = float(row.get("Cost per purchase (BRL)") or 0.0)
         purchases = float(row.get("Purchases") or 0.0)
         key = (name, ad_set)
         
@@ -412,6 +483,8 @@ def parse_meta_ads() -> list[dict]:
         if rec is None:
             rec = {
                 "id": f"meta-{len(merged) + 1}",
+                "dateStart": str(row.get("Reporting starts") or "").strip() or None,
+                "dateEnd": str(row.get("Reporting ends") or "").strip() or None,
                 "source": "meta",
                 "name": name,
                 "campaign": name.rsplit(" AD", 1)[0] if " AD" in name else name,
@@ -426,23 +499,25 @@ def parse_meta_ads() -> list[dict]:
                 "headlines": [],
                 "descriptions": [],
                 "hasImageIds": False,
-                "spend": 0.0,
-                "impressions": 0,
-                "reach": 0,
-                "clicks": 0,
-                "ctr": 0.0,
+                "spend": spend,
+                "impressions": impressions,
+                "reach": reach,
+                "clicks": clicks,
+                "ctr": ctr,
                 "resultsCadastro": 0.0,
                 "resultsLanding": 0.0,
                 "conversas": 0,
-                "conversions": 0.0,
+                "conversions": conversions,
+                "cpr": cpr,
+                		
             }
             merged[key] = rec
 
-        rec["spend"] = max(rec["spend"], round(spend, 2))
-        rec["impressions"] = max(rec["impressions"], impressions)
-        rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
+        # rec["spend"] = max(rec["spend"], round(spend, 2))
+        # rec["impressions"] = max(rec["impressions"], impressions)
+        # rec["reach"] = max(rec["reach"], int(row.get("Reach") or 0))
         rec["conversas"] = max(rec["conversas"], int(row.get("Total messaging contacts") or 0))
-        rec["conversions"] += purchases
+        # rec["conversions"] += purchases
 
     out = [r for r in merged.values() if r["spend"] > 0 or r["impressions"] > 0 or r["conversions"] > 0]
     out.sort(key=lambda r: r["spend"], reverse=True)
@@ -826,11 +901,18 @@ def main() -> None:
     creatives = parse_meta_ads() + parse_google_ads()
     excel = parse_copart_xlsx()
     daily = excel["copartDaily"]
+    visao_geral = parse_visao_geral_midia()
+    dates_start = [r["date_start"] for r in visao_geral if r.get("date_start")]
+    dates_end = [r["date_end"] for r in visao_geral if r.get("date_end")]
+    media_start = min(dates_start) if dates_start else "2026-08-01"
+    media_end = max(dates_end) if dates_end else "2026-08-31"
+
+
     snapshot = {
         "origin": "weekly_report",
-        "originLabel": "Meta + GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
-        "mediaStart": "2026-08-01",
-        "mediaEnd": "2026-08-31",
+        "originLabel": "Meta Atualizado · GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026",
+        "mediaStart": media_start,
+        "mediaEnd": media_end,
         "copartStart": daily[0]["date"] if daily else "2026-09-01",
         "copartEnd": daily[-1]["date"] if daily else "2026-09-13",
         "files": sorted(
@@ -848,6 +930,7 @@ def main() -> None:
         "creatives": meta_creatives,
         "new_campaigns": meta_campaigns,
         "new_creatives": meta_creatives,
+        "new_visao_geral_midias": parse_visao_geral_midia(),
     }
     OUT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
     spend = sum(c["spend"] for c in campaigns)

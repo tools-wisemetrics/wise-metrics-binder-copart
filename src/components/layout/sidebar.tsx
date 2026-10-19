@@ -24,24 +24,14 @@ const navGroups = [
     items: [
       { label: "Visão Geral", href: "/dashboard", icon: "LayoutDashboard" },
       { label: "Funil de Leilão", href: "/dashboard/funnel", icon: "Filter" },
-      { label: "Copart Select", href: "/dashboard/direct-sales", icon: "MessageCircle" },
-      { label: "Metas por Canal", href: "/dashboard/channel-goals", icon: "Target" },
-      { label: "Canais de origem", href: "/dashboard/conversion-paths", icon: "Route" },
-      { label: "Análise Regional", href: "/dashboard/regional", icon: "Map" },
-      { label: "Evolução", href: "/dashboard/evolution", icon: "TrendingUp" },
     ],
   },
   {
     label: "Operacional",
     items: [
-      { label: "Mídia Paga", href: "/dashboard/paid-media", icon: "BarChart3" },
-      { label: "Scorecard de campanhas", href: "/dashboard/campaigns", icon: "BarChart3" },
       { label: "Campanhas Leilão", href: "/dashboard/auction-campaigns", icon: "Gavel" },
       { label: "Campanhas Select", href: "/dashboard/direct-campaigns", icon: "ShoppingCart" },
-      { label: "Alertas", href: "/dashboard/alerts", icon: "AlertTriangle" },
-      { label: "Recomendações", href: "/dashboard/recommendations", icon: "Lightbulb" },
-      { label: "Relatório", href: "/dashboard/report", icon: "FileText" },
-      { label: "Criativos", href: "/dashboard/creatives", icon: "Images" },
+      // { label: "Mídia Paga", href: "/dashboard/paid-media", icon: "BarChart3" },
     ],
   },
   {
@@ -49,6 +39,16 @@ const navGroups = [
     items: [
       { label: "Assistente de IA", href: "/dashboard/assistant", icon: "Bot" },
       { label: "Segurança", href: "/dashboard/security", icon: "Shield" },
+      { label: "Copart Select", href: "/dashboard/direct-sales", icon: "MessageCircle" },
+      { label: "Metas por Canal", href: "/dashboard/channel-goals", icon: "Target" },
+      { label: "Canais de origem", href: "/dashboard/conversion-paths", icon: "Route" },
+      { label: "Análise Regional", href: "/dashboard/regional", icon: "Map" },
+      { label: "Evolução", href: "/dashboard/evolution", icon: "TrendingUp" },
+      { label: "Scorecard de campanhas", href: "/dashboard/campaigns", icon: "BarChart3" },
+      { label: "Alertas", href: "/dashboard/alerts", icon: "AlertTriangle" },
+      { label: "Recomendações", href: "/dashboard/recommendations", icon: "Lightbulb" },
+      { label: "Relatório", href: "/dashboard/report", icon: "FileText" },
+      { label: "Criativos", href: "/dashboard/creatives", icon: "Images" },
     ],
   },
 ];
@@ -86,8 +86,8 @@ function SidebarNav() {
                       isActive
                         ? "bg-gradient-to-r from-[#00b8cf]/20 to-[#153a73]/20 text-white border border-[#00b8cf]/30"
                         : upcoming
-                        ? "text-[#6b8098] hover:bg-white/5 hover:text-white"
-                        : "text-[#8aa4be] hover:bg-white/5 hover:text-white"
+                          ? "text-[#6b8098] hover:bg-white/5 hover:text-white"
+                          : "text-[#8aa4be] hover:bg-white/5 hover:text-white"
                     )}
                   >
                     <Icon

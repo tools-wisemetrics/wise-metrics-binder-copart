@@ -123,6 +123,15 @@ export const DEFAULT_DATE_RANGE = {
   end: "2026-08-31",
 } as const;
 
+// import snapshotJson from "./data/raw-snapshot.json";
+
+// export const DEFAULT_DATE_RANGE = {
+//   start: snapshotJson.mediaStart ?? "2026-08-01",
+//   end: snapshotJson.mediaEnd ?? "2026-08-31",
+// };
+
+
+
 export const DATA_ORIGIN_LABEL = "Meta + GA4 ago/2026 · GA4/Google 15/06–15/09 · Copart set/2026";
 
 import { BRAZIL_UFS } from "@/lib/data/ibge-population";
