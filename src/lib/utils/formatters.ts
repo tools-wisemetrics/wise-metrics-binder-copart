@@ -20,10 +20,12 @@ export function formatBRL(value: number): string {
  */
 export function formatNumber(value: number): string {
   if (Math.abs(value) >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(1).replace('.', ',')}M`;
+    const formatted = (value / 1_000_000).toFixed(1).replace('.', ',');
+    return `${formatted.endsWith(',0') ? formatted.slice(0, -2) : formatted}M`;
   }
   if (Math.abs(value) >= 1_000) {
-    return `${(value / 1_000).toFixed(0)}k`;
+    const formatted = (value / 1_000).toFixed(1).replace('.', ',');
+    return `${formatted.endsWith(',0') ? formatted.slice(0, -2) : formatted}k`;
   }
   return new Intl.NumberFormat('pt-BR').format(value);
 }
@@ -33,6 +35,24 @@ export function formatNumber(value: number): string {
  */
 export function formatNumberFull(value: number): string {
   return new Intl.NumberFormat('pt-BR').format(value);
+}
+
+/**
+ * Formata número com separador de milhar brasileiro (.)
+ * e arredonda casas decimais pela regra matemática padrão (>= 0.5 arredonda para cima, < 0.5 para baixo)
+ */
+export function formatNumberRounded(value: number, decimals: number = 0): string {
+  if (decimals === 0) {
+    return new Intl.NumberFormat('pt-BR', {
+      maximumFractionDigits: 0,
+    }).format(Math.round(value));
+  }
+  const factor = Math.pow(10, decimals);
+  const rounded = Math.round(value * factor) / factor;
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(rounded);
 }
 
 /**

@@ -59,7 +59,7 @@ export default async function SelectCampaignsPage({
         <SectionTitle>Conversas no mês</SectionTitle>
         <CardWrapper>
           <p className="text-sm text-[#344255]">
-            Meta Ads trouxe {formatNumberFull(conversas)} conversas no consolidado de agosto. Esta carga não tem série diária de conversas — o gráfico diário foi omitido para não inventar uma reta.
+            Meta Ads trouxe {formatNumberFull(conversas)} conversas no consolidado do período.
           </p>
         </CardWrapper>
       </PageContent>
