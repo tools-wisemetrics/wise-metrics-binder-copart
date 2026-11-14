@@ -711,6 +711,7 @@ def parse_pacing_midia_paga() -> list[dict]:
                 "id": f"pacing-{idx}",
                 "ano": ano,
                 "mes": mes,
+                "anoMes": f"{ano}-{mes:02d}" if ano > 0 and 1 <= mes <= 12 else None,
                 "unNegocio": un_negocio,
                 "plataforma": plataforma,
                 "tipoCampanha": tipo_campanha,
