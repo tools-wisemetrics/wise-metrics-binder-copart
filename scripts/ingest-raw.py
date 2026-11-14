@@ -28,6 +28,39 @@ if SUPABASE_URL and SUPABASE_KEY:
 else:
     print("Aviso: Variáveis do Supabase não encontradas!")
 
+def fetch_supabase_view(view_name: str) -> list[dict]:
+    """Centraliza a consulta ao Supabase com tratamento de erro."""
+    if not supabase:
+        print(f"Aviso: Supabase não configurado. Pulando '{view_name}'.")
+        return []
+    try:
+        response = supabase.table(view_name).select("*").execute()
+        return response.data or []
+    except Exception as exc:
+        print(f"[ERRO] Falha ao consultar '{view_name}': {exc}")
+        return []
+
+#Conversao de numeros int e float    
+def safe_float(value: object, default: float = 0.0) -> float:
+    """Converte valores do banco para float com segurança contra None ou strings vazias."""
+    if value is None or value == "":
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def safe_int(value: object, default: int = 0) -> int:
+    """Converte valores do banco para int com segurança (inclusive strings decimais como '2026.0')."""
+    if value is None or value == "":
+        return default
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return default
+
+
 
 def find_raw(*needles: str) -> Path:
     folded = [strip_accents(n).lower() for n in needles]
@@ -643,6 +676,60 @@ def parse_google_ads() -> list[dict]:
     return ads
 
 
+# ====================================================
+# 4. PARSE PACING MÍDIA PAGA (Direto da View)
+# ====================================================
+def parse_pacing_midia_paga() -> list[dict]:
+    rows = fetch_supabase_view("vw_dashboard_pacing_midia_paga")
+    pacing_rows: list[dict] = []
+
+    for idx, row in enumerate(rows, start=1):
+        ano = safe_int(row.get("ano"))
+        mes = safe_int(row.get("mes"))
+        un_negocio = str(row.get("un_negocio") or "").strip()
+        plataforma = str(row.get("plataforma") or "").strip()
+        tipo_campanha = str(row.get("tipo_campanha") or "").strip()
+
+        budget_inv_bruto = safe_float(row.get("budget_inv_bruto"))
+        budget_inv_liquido = safe_float(row.get("budget_inv_liquido"))
+        investimento = safe_float(row.get("investimento"))
+        saldo_restante = safe_float(row.get("saldo_restante"))
+
+        total_dias_mes = safe_int(row.get("total_dias_mes"))
+        dias_decorridos = safe_int(row.get("dias_decorridos"))
+        dias_restantes = safe_int(row.get("dias_restantes"))
+
+        dt_atualizacao_raw = row.get("dt_atualizacao")
+        dt_atualizacao = str(dt_atualizacao_raw).strip() if dt_atualizacao_raw else None
+
+        # Ignora linhas sem orçamento planejado nem gasto realizado
+        if budget_inv_liquido <= 0 and budget_inv_bruto <= 0 and investimento <= 0:
+            continue
+
+        pacing_rows.append(
+            {
+                "id": f"pacing-{idx}",
+                "ano": ano,
+                "mes": mes,
+                "unNegocio": un_negocio,
+                "plataforma": plataforma,
+                "tipoCampanha": tipo_campanha,
+                "budgetInvBruto": round(budget_inv_bruto, 2),
+                "budgetInvLiquido": round(budget_inv_liquido, 2),
+                "investimento": round(investimento, 2),
+                "dtAtualizacao": dt_atualizacao,
+                "totalDiasMes": total_dias_mes,
+                "diasDecorridos": dias_decorridos,
+                "saldoRestante": round(saldo_restante, 2),
+                "diasRestantes": dias_restantes,
+            }
+        )
+
+    pacing_rows.sort(key=lambda r: (r["ano"], r["mes"], r["budgetInvLiquido"]), reverse=True)
+    return pacing_rows
+
+
+
 def parse_ga4_paid_download() -> dict | None:
     try:
         path = find_raw("ga4_eventos-midia-paga")
@@ -931,6 +1018,7 @@ def main() -> None:
         "new_campaigns": meta_campaigns,
         "new_creatives": meta_creatives,
         "new_visao_geral_midias": parse_visao_geral_midia(),
+        "pacing_midia_paga": parse_pacing_midia_paga(),
     }
     OUT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
     spend = sum(c["spend"] for c in campaigns)
