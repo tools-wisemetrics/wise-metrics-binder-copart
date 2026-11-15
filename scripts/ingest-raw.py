@@ -689,6 +689,7 @@ def parse_pacing_midia_paga() -> list[dict]:
         un_negocio = str(row.get("un_negocio") or "").strip()
         plataforma = str(row.get("plataforma") or "").strip()
         tipo_campanha = str(row.get("tipo_campanha") or "").strip()
+        fl_verba_extra = safe_int(row.get("fl_verba_extra"))
 
         budget_inv_bruto = safe_float(row.get("budget_inv_bruto"))
         budget_inv_liquido = safe_float(row.get("budget_inv_liquido"))
@@ -715,6 +716,7 @@ def parse_pacing_midia_paga() -> list[dict]:
                 "unNegocio": un_negocio,
                 "plataforma": plataforma,
                 "tipoCampanha": tipo_campanha,
+                "flVerbaExtra": fl_verba_extra,
                 "budgetInvBruto": round(budget_inv_bruto, 2),
                 "budgetInvLiquido": round(budget_inv_liquido, 2),
                 "investimento": round(investimento, 2),
@@ -726,7 +728,7 @@ def parse_pacing_midia_paga() -> list[dict]:
             }
         )
 
-    pacing_rows.sort(key=lambda r: (r["ano"], r["mes"], r["budgetInvLiquido"]), reverse=True)
+    # pacing_rows.sort(key=lambda r: (r["ano"], r["mes"], r["budgetInvLiquido"]), reverse=True)
     return pacing_rows
 
 
