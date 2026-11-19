@@ -66,42 +66,42 @@ const Pacing = () => {
         <GoalCardPacing
           key={'meta'}
           title={'Meta'}
-          current={getTotalInvestment('plataforma', 'Meta')}
-          target={getTotalNetBudgetInvestment('plataforma', 'Meta')}
+          current={getTotalInvestment(undefined, 'plataforma', 'Meta')}
+          target={getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta')}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment('plataforma', 'Meta'),
-            getTotalNetBudgetInvestment('plataforma', 'Meta'),
+            getTotalInvestment(undefined, 'plataforma', 'Meta'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
           )}
           description={getDescription(
-            getTotalInvestment('plataforma', 'Meta'),
-            getTotalNetBudgetInvestment('plataforma', 'Meta'),
-            getProjection(getTotalInvestment('plataforma', 'Meta')),
+            getTotalInvestment(undefined, 'plataforma', 'Meta'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
+            getProjection(getTotalInvestment(undefined, 'plataforma', 'Meta')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment('plataforma', 'Meta'),
-            getTotalNetBudgetInvestment('plataforma', 'Meta'),
-            getProjection(getTotalInvestment('plataforma', 'Meta')),
+            getTotalInvestment(undefined, 'plataforma', 'Meta'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
+            getProjection(getTotalInvestment(undefined, 'plataforma', 'Meta')),
           )}
         />
 
         <GoalCardPacing
           key={'google-ads'}
           title={'Google Ads'}
-          current={getTotalInvestment('plataforma', 'Google Ads')}
-          target={getTotalNetBudgetInvestment('plataforma', 'Google Ads')}
+          current={getTotalInvestment(undefined, 'plataforma', 'Google Ads')}
+          target={getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads')}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment('plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment('plataforma', 'Google Ads'),
+            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
           )}
           description={getDescription(
-            getTotalInvestment('plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment('plataforma', 'Google Ads'),
-            getProjection(getTotalInvestment('plataforma', 'Google Ads')),
+            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
+            getProjection(getTotalInvestment(undefined, 'plataforma', 'Google Ads')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment('plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment('plataforma', 'Google Ads'),
-            getProjection(getTotalInvestment('plataforma', 'Google Ads')),
+            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
+            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
+            getProjection(getTotalInvestment(undefined, 'plataforma', 'Google Ads')),
           )}
         />
       </div>
@@ -111,63 +111,63 @@ const Pacing = () => {
         <GoalCardPacing
           key={'leilao'}
           title={'Leilão'}
-          current={getTotalInvestment('unNegocio', 'Leilão')}
-          target={getTotalNetBudgetInvestment('unNegocio', 'Leilão')}
+          current={getTotalInvestment(undefined, 'unNegocio', 'Leilão')}
+          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão')}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment('unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment('unNegocio', 'Leilão'),
+            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
           )}
           description={getDescription(
-            getTotalInvestment('unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment('unNegocio', 'Leilão'),
-            getProjection(getTotalInvestment('unNegocio', 'Leilão')),
+            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Leilão')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment('unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment('unNegocio', 'Leilão'),
-            getProjection(getTotalInvestment('unNegocio', 'Leilão')),
+            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Leilão')),
           )}
         />
 
         <GoalCardPacing
           key={'select'}
           title={'Select'}
-          current={getTotalInvestment('unNegocio', 'Select')}
-          target={getTotalNetBudgetInvestment('unNegocio', 'Select')}
+          current={getTotalInvestment(undefined, 'unNegocio', 'Select')}
+          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select')}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment('unNegocio', 'Select'),
-            getTotalNetBudgetInvestment('unNegocio', 'Select'),
+            getTotalInvestment(undefined, 'unNegocio', 'Select'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
           )}
           description={getDescription(
-            getTotalInvestment('unNegocio', 'Select'),
-            getTotalNetBudgetInvestment('unNegocio', 'Select'),
-            getProjection(getTotalInvestment('unNegocio', 'Select')),
+            getTotalInvestment(undefined, 'unNegocio', 'Select'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Select')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment('unNegocio', 'Select'),
-            getTotalNetBudgetInvestment('unNegocio', 'Select'),
-            getProjection(getTotalInvestment('unNegocio', 'Select')),
+            getTotalInvestment(undefined, 'unNegocio', 'Select'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Select')),
           )}
         />
 
         <GoalCardPacing
           key={'comitentes'}
           title={'Comitentes'}
-          current={getTotalInvestment('unNegocio', 'Comitentes')}
-          target={getTotalNetBudgetInvestment('unNegocio', 'Comitentes')}
+          current={getTotalInvestment(undefined, 'unNegocio', 'Comitentes')}
+          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes')}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment('unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment('unNegocio', 'Comitentes'),
+            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
           )}
           description={getDescription(
-            getTotalInvestment('unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment('unNegocio', 'Comitentes'),
-            getProjection(getTotalInvestment('unNegocio', 'Comitentes')),
+            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Comitentes')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment('unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment('unNegocio', 'Comitentes'),
-            getProjection(getTotalInvestment('unNegocio', 'Comitentes')),
+            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
+            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
+            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Comitentes')),
           )}
         />
       </div>
@@ -239,7 +239,7 @@ const Pacing = () => {
       </div>
 
       <SectionTitle>Controle Financeiro - Mês Atual</SectionTitle>
-      <TablePancing tableData={getTableData()} />
+      <TablePancing tableData={getTableData({ month: new Date().getMonth() + 1 })} />
     </>
   );
 };
