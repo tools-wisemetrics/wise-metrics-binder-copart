@@ -56,9 +56,13 @@ export const usePacing = () => {
   //     return (totalInvestment / totalNetBudgetInvestment) * 100;
   //   }, [totalInvestment, totalNetBudgetInvestment]);
 
-  const getTotalNetBudgetInvestment = (type?: keyof TPacing, value?: string | number) => {
+  const getTotalNetBudgetInvestment = (
+    monthSelected?: number,
+    type?: keyof TPacing,
+    value?: string | number,
+  ) => {
     return rawSnapshot.reduce((total, item) => {
-      const sameMonth = item.mes === month;
+      const sameMonth = item.mes === (monthSelected ?? month);
       const matchesFilter = type === undefined || item[type] === value;
 
       if (sameMonth && matchesFilter) {
@@ -69,9 +73,9 @@ export const usePacing = () => {
     }, 0);
   };
 
-  const getTotalInvestment = (type?: keyof TPacing, value?: string | number) => {
+  const getTotalInvestment = (monthSelected?: number, type?: keyof TPacing, value?: string | number) => {
     return rawSnapshot.reduce((total, item) => {
-      const sameMonth = item.mes === month;
+      const sameMonth = item.mes === (monthSelected ?? month);
       const matchesFilter = type === undefined || item[type] === value;
 
       if (sameMonth && matchesFilter) {
@@ -129,7 +133,7 @@ export const usePacing = () => {
     }
   };
 
-  const getTotalTable = (business: string, column: keyof TPacing, platform: string) => {
+  const getTotalTable = (month: number, business: string, column: keyof TPacing, platform: string) => {
     return rawSnapshot.reduce(
       (total, item) =>
         item.mes === month && item.unNegocio === business && item.plataforma === platform
@@ -139,65 +143,65 @@ export const usePacing = () => {
     );
   };
 
-  const getTableData = () => {
+  const getTableData = ({ month }: { month: number }) => {
     return [
       {
         unidade: 'Select',
         meta: {
-          entrada: getTotalTable('Select', 'budgetInvBruto', 'Meta'),
-          verbaLiquida: getTotalTable('Select', 'budgetInvLiquido', 'Meta'),
-          saida: getTotalTable('Select', 'investimento', 'Meta'),
+          entrada: getTotalTable(month, 'Select', 'budgetInvBruto', 'Meta'),
+          verbaLiquida: getTotalTable(month, 'Select', 'budgetInvLiquido', 'Meta'),
+          saida: getTotalTable(month, 'Select', 'investimento', 'Meta'),
           falta:
-            getTotalTable('Select', 'budgetInvLiquido', 'Meta') -
-            getTotalTable('Select', 'investimento', 'Meta'),
+            getTotalTable(month, 'Select', 'budgetInvLiquido', 'Meta') -
+            getTotalTable(month, 'Select', 'investimento', 'Meta'),
         },
         google: {
-          entrada: getTotalTable('Select', 'budgetInvBruto', 'Google Ads'),
-          verbaLiquida: getTotalTable('Select', 'budgetInvLiquido', 'Google Ads'),
-          saida: getTotalTable('Select', 'investimento', 'Google Ads'),
+          entrada: getTotalTable(month, 'Select', 'budgetInvBruto', 'Google Ads'),
+          verbaLiquida: getTotalTable(month, 'Select', 'budgetInvLiquido', 'Google Ads'),
+          saida: getTotalTable(month, 'Select', 'investimento', 'Google Ads'),
           falta:
-            getTotalTable('Select', 'budgetInvLiquido', 'Google Ads') -
-            getTotalTable('Select', 'investimento', 'Google Ads'),
+            getTotalTable(month, 'Select', 'budgetInvLiquido', 'Google Ads') -
+            getTotalTable(month, 'Select', 'investimento', 'Google Ads'),
         },
       },
 
       {
         unidade: 'Leilão',
         meta: {
-          entrada: getTotalTable('Leilão', 'budgetInvBruto', 'Meta'),
-          verbaLiquida: getTotalTable('Leilão', 'budgetInvLiquido', 'Meta'),
-          saida: getTotalTable('Leilão', 'investimento', 'Meta'),
+          entrada: getTotalTable(month, 'Leilão', 'budgetInvBruto', 'Meta'),
+          verbaLiquida: getTotalTable(month, 'Leilão', 'budgetInvLiquido', 'Meta'),
+          saida: getTotalTable(month, 'Leilão', 'investimento', 'Meta'),
           falta:
-            getTotalTable('Leilão', 'budgetInvLiquido', 'Meta') -
-            getTotalTable('Leilão', 'investimento', 'Meta'),
+            getTotalTable(month, 'Leilão', 'budgetInvLiquido', 'Meta') -
+            getTotalTable(month, 'Leilão', 'investimento', 'Meta'),
         },
         google: {
-          entrada: getTotalTable('Leilão', 'budgetInvBruto', 'Google Ads'),
-          verbaLiquida: getTotalTable('Leilão', 'budgetInvLiquido', 'Google Ads'),
-          saida: getTotalTable('Leilão', 'investimento', 'Google Ads'),
+          entrada: getTotalTable(month, 'Leilão', 'budgetInvBruto', 'Google Ads'),
+          verbaLiquida: getTotalTable(month, 'Leilão', 'budgetInvLiquido', 'Google Ads'),
+          saida: getTotalTable(month, 'Leilão', 'investimento', 'Google Ads'),
           falta:
-            getTotalTable('Leilão', 'budgetInvLiquido', 'Google Ads') -
-            getTotalTable('Leilão', 'investimento', 'Google Ads'),
+            getTotalTable(month, 'Leilão', 'budgetInvLiquido', 'Google Ads') -
+            getTotalTable(month, 'Leilão', 'investimento', 'Google Ads'),
         },
       },
 
       {
         unidade: 'Comitentes',
         meta: {
-          entrada: getTotalTable('Comitentes', 'budgetInvBruto', 'Meta'),
-          verbaLiquida: getTotalTable('Comitentes', 'budgetInvLiquido', 'Meta'),
-          saida: getTotalTable('Comitentes', 'investimento', 'Meta'),
+          entrada: getTotalTable(month, 'Comitentes', 'budgetInvBruto', 'Meta'),
+          verbaLiquida: getTotalTable(month, 'Comitentes', 'budgetInvLiquido', 'Meta'),
+          saida: getTotalTable(month, 'Comitentes', 'investimento', 'Meta'),
           falta:
-            getTotalTable('Comitentes', 'budgetInvLiquido', 'Meta') -
-            getTotalTable('Comitentes', 'investimento', 'Meta'),
+            getTotalTable(month, 'Comitentes', 'budgetInvLiquido', 'Meta') -
+            getTotalTable(month, 'Comitentes', 'investimento', 'Meta'),
         },
         google: {
-          entrada: getTotalTable('Comitentes', 'budgetInvBruto', 'Google Ads'),
-          verbaLiquida: getTotalTable('Comitentes', 'budgetInvLiquido', 'Google Ads'),
-          saida: getTotalTable('Comitentes', 'investimento', 'Google Ads'),
+          entrada: getTotalTable(month, 'Comitentes', 'budgetInvBruto', 'Google Ads'),
+          verbaLiquida: getTotalTable(month, 'Comitentes', 'budgetInvLiquido', 'Google Ads'),
+          saida: getTotalTable(month, 'Comitentes', 'investimento', 'Google Ads'),
           falta:
-            getTotalTable('Comitentes', 'budgetInvLiquido', 'Google Ads') -
-            getTotalTable('Comitentes', 'investimento', 'Google Ads'),
+            getTotalTable(month, 'Comitentes', 'budgetInvLiquido', 'Google Ads') -
+            getTotalTable(month, 'Comitentes', 'investimento', 'Google Ads'),
         },
       },
     ];
