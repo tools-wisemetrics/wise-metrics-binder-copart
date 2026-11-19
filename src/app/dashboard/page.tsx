@@ -83,6 +83,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
   // const mixColors = ['#8c5be8', '#00a85a', '#cf3044', '#6c7685'];
 
   const period = formatDateRangeLabel(filters.dateRange.start, filters.dateRange.end);
+  const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long' });
 
   return (
     <>
@@ -244,7 +245,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
 
           <div className='bg-[#e8f8ef] px-3 py-1.5 rounded-xl border border-[#00a85a]/30 flex items-center gap-2'>
             <CheckCircle2 className='w-5 h-5 text-[#007342]' />
-            <span className='font-semibold text-[#007342] mt-0.5'>Mês de Novembro</span>
+            <span className='font-semibold text-[#007342] mt-0.5'>Mês de {monthName}</span>
           </div>
         </div>
 
