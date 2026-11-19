@@ -731,6 +731,33 @@ def parse_pacing_midia_paga() -> list[dict]:
     # pacing_rows.sort(key=lambda r: (r["ano"], r["mes"], r["budgetInvLiquido"]), reverse=True)
     return pacing_rows
 
+# ====================================================
+# 5. PARSE PACING PERIODO MINIMO PARA FILTROS
+# ====================================================
+def parse_pacing_periodo() -> list[dict]:
+    rows = fetch_supabase_view("vw_dashboard_pacing_periodo")
+    pacing_period_rows: list[dict] = []
+
+    for idx, row in enumerate(rows, start=1):
+        ano_inicial = safe_int(row.get("ano_inicial"))
+        mes_inicial = safe_int(row.get("mes_inicial"))
+        
+        dt_atualizacao_raw = row.get("dt_atualizacao")
+        dt_atualizacao = str(dt_atualizacao_raw).strip() if dt_atualizacao_raw else None
+
+
+        pacing_period_rows.append(
+            {
+                "id": f"pacing_periodo-{idx}",
+                "anoInicial": ano_inicial,
+                "mesInicial": mes_inicial,
+                "anoMes": f"{ano_inicial}-{mes_inicial:02d}" if ano_inicial > 0 and 1 <= mes_inicial <= 12 else None,
+                "dtAtualizacao": dt_atualizacao,
+            }
+        )
+   
+    return pacing_period_rows
+
 
 
 def parse_ga4_paid_download() -> dict | None:
@@ -1022,6 +1049,7 @@ def main() -> None:
         "new_creatives": meta_creatives,
         "new_visao_geral_midias": parse_visao_geral_midia(),
         "pacing_midia_paga": parse_pacing_midia_paga(),
+        "pacing_periodo": parse_pacing_periodo(),
     }
     OUT.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
     spend = sum(c["spend"] for c in campaigns)
