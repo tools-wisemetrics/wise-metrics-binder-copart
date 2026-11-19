@@ -10,6 +10,7 @@ import { CheckCircle2, Database, ShieldCheck, TrendingUp } from 'lucide-react';
 
 import { PaidMediaView } from '@/components/paid-media/paid-media-view';
 import Pacing from '@/components/pacing/pacing';
+import Link from 'next/link';
 
 // import { KpiCard } from '@/components/cards/kpi-card';
 // import { DoughnutChart } from '@/components/charts/doughnut-chart';
@@ -234,7 +235,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           ))}
         </div>
 
-        <div className='flex items-center gap-16 mt-8 mb-8'>
+        <div className='flex items-center gap-16 mt-8 mb-8 relative'>
           {/* <div className='text-[#00b8cf]'>
             <TrendingUp className='w-12 h-12' />
           </div> */}
@@ -246,6 +247,12 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           <div className='bg-[#e8f8ef] px-3 py-1.5 rounded-xl border border-[#00a85a]/30 flex items-center gap-2'>
             <CheckCircle2 className='w-5 h-5 text-[#007342]' />
             <span className='font-semibold text-[#007342] mt-0.5'>Mês de {monthName}</span>
+          </div>
+
+          <div className='absolute right-0 bg-[#0b1f3a] px-3 py-1.5 rounded-xl border border-[#0b1f3a] flex items-center gap-2'>
+            <Link href='/logFinanceiro' className='font-semibold text-white mt-0.5'>
+              Log Financeiro
+            </Link>
           </div>
         </div>
 

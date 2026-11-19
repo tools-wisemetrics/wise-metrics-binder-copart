@@ -124,7 +124,7 @@ const Pacing = () => {
     <>
       <FilterYear setYear={setSelectedYear} />
       <PageContent>
-        <div className='flex items-center justify-between mt-8 mb-8'>
+        <div className='flex items-center justify-between mb-8'>
           <div>
             <h2 className='text-xl font-black tracking-tight text-[#0b1f3a] border-b-2 border-[#00b8cf]'>
               Log Financeiro
