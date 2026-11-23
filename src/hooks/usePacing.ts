@@ -27,62 +27,21 @@ export const usePacing = () => {
   const [monthTotalDays, setMonthTotalDays] = useState(0);
   const [monthDaysElapsed, setMonthDaysElapsed] = useState(0);
   const [tableData, setTableData] = useState<Array<Record<string, string>>>([]);
-  //const [monthDaysRemaining, setMonthDaysRemaining] = useState(0);
 
-  //   const totalNetBudgetInvestment = useMemo(() => {
-  //     return rawSnapshot.reduce(
-  //       (total, item) => (item.mes === month ? total + item.budgetInvLiquido : total),
-  //       0,
-  //     );
-  //   }, [month]);
-
-  //   const totalInvestment = useMemo(() => {
-  //     return rawSnapshot.reduce((total, item) => (item.mes === month ? total + item.investimento : total), 0);
-  //   }, [month]);
-
-  //   const dailyAveragePacing = useMemo(() => {
-  //     return totalNetBudgetInvestment / monthTotalDays;
-  //   }, [monthTotalDays, totalNetBudgetInvestment]);
-
-  //   const currentDailyAveragePacing = useMemo(() => {
-  //     return totalInvestment / monthDaysElapsed;
-  //   }, [monthDaysElapsed, totalInvestment]);
-
-  //   const projection = useMemo(() => {
-  //     return (totalInvestment / monthDaysElapsed) * monthTotalDays;
-  //   }, [monthDaysElapsed, totalInvestment, monthTotalDays]);
-
-  //   const budgetConsumedPercentage = useMemo(() => {
-  //     return (totalInvestment / totalNetBudgetInvestment) * 100;
-  //   }, [totalInvestment, totalNetBudgetInvestment]);
-
-  const getTotalNetBudgetInvestment = (
+  const getTotal = (
+    totalProp: keyof TPacing,
     monthSelected?: number,
-    type?: keyof TPacing,
-    value?: string | number,
+    filters?: Array<{ type: keyof TPacing; value: string | number }>,
   ) => {
     return rawSnapshot.reduce((total, item) => {
       const sameMonth = item.mes === (monthSelected ?? month);
-      const matchesFilter = type === undefined || item[type] === value;
+      const matchesFilter = !filters || filters.every(({ type, value }) => item[type] === value);
 
       if (sameMonth && matchesFilter) {
-        return total + item.budgetInvLiquido;
+        return Math.round(total + (item[totalProp] as number));
       }
 
-      return total;
-    }, 0);
-  };
-
-  const getTotalInvestment = (monthSelected?: number, type?: keyof TPacing, value?: string | number) => {
-    return rawSnapshot.reduce((total, item) => {
-      const sameMonth = item.mes === (monthSelected ?? month);
-      const matchesFilter = type === undefined || item[type] === value;
-
-      if (sameMonth && matchesFilter) {
-        return total + item.investimento;
-      }
-
-      return total;
+      return Math.round(total);
     }, 0);
   };
 
@@ -92,10 +51,10 @@ export const usePacing = () => {
       const matchesFilter = propCompare === undefined || item[propCompare] === value;
 
       if (sameMonth && matchesFilter) {
-        return total + (item[propTotal] as number);
+        return Math.round(total + (item[propTotal] as number));
       }
 
-      return total;
+      return Math.round(total);
     }, 0);
   };
 
@@ -211,8 +170,6 @@ export const usePacing = () => {
     setMonth,
     setMonthTotalDays,
     setMonthDaysElapsed,
-    getTotalNetBudgetInvestment,
-    getTotalInvestment,
     getAveragePacing,
     getProjection,
     getBudgetConsumedPercentage,
@@ -220,5 +177,6 @@ export const usePacing = () => {
     getDescription,
     getTableData,
     getTotalExtraFunds,
+    getTotal,
   };
 };

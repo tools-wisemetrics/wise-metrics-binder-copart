@@ -8,14 +8,13 @@ import { Database, ShieldCheck } from 'lucide-react';
 import { usePacing } from '@/hooks/usePacing';
 import { useEffect } from 'react';
 import { TablePancing } from '../tables/tablePancing';
+import { GoalTableCardPacing } from '../cards/goal-table-card-pacing';
 
 const Pacing = () => {
   const {
     setMonth,
     setMonthTotalDays,
     setMonthDaysElapsed,
-    getTotalNetBudgetInvestment,
-    getTotalInvestment,
     getAveragePacing,
     getProjection,
     getBudgetConsumedPercentage,
@@ -23,6 +22,7 @@ const Pacing = () => {
     getDescription,
     getTableData,
     getTotalExtraFunds,
+    getTotal,
   } = usePacing();
 
   useEffect(() => {
@@ -38,6 +38,268 @@ const Pacing = () => {
     );
   }, []);
 
+  const tableBusinessLeilao = [
+    {
+      key: 'leilao',
+      title: 'Total',
+      current: getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+      target: getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+        getProjection(getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }])),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Leilão' }]),
+        getProjection(getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Leilão' }])),
+      ),
+    },
+    {
+      key: 'leilaoMeta',
+      title: 'Leilão no Meta',
+      current: getTotal('investimento', undefined, [
+        { type: 'unNegocio', value: 'Leilão' },
+        { type: 'plataforma', value: 'Meta' },
+      ]),
+      target: getTotal('budgetInvLiquido', undefined, [
+        { type: 'unNegocio', value: 'Leilão' },
+        { type: 'plataforma', value: 'Meta' },
+      ]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Leilão' },
+            { type: 'plataforma', value: 'Meta' },
+          ]),
+        ),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Leilão' },
+            { type: 'plataforma', value: 'Meta' },
+          ]),
+        ),
+      ),
+    },
+    {
+      key: 'leilaoGoogleAds',
+      title: 'Leilão no Google Ads',
+      current: getTotal('investimento', undefined, [
+        { type: 'unNegocio', value: 'Leilão' },
+        { type: 'plataforma', value: 'Google Ads' },
+      ]),
+      target: getTotal('budgetInvLiquido', undefined, [
+        { type: 'unNegocio', value: 'Leilão' },
+        { type: 'plataforma', value: 'Google Ads' },
+      ]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Leilão' },
+            { type: 'plataforma', value: 'Google Ads' },
+          ]),
+        ),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Leilão' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Leilão' },
+            { type: 'plataforma', value: 'Google Ads' },
+          ]),
+        ),
+      ),
+    },
+  ];
+
+  const tableBusinessSelect = [
+    {
+      key: 'select',
+      title: 'Total',
+      current: getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+      target: getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+        getProjection(getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }])),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+        getTotal('budgetInvLiquido', undefined, [{ type: 'unNegocio', value: 'Select' }]),
+        getProjection(getTotal('investimento', undefined, [{ type: 'unNegocio', value: 'Select' }])),
+      ),
+    },
+    {
+      key: 'selectMeta',
+      title: 'Select no Meta',
+      current: getTotal('investimento', undefined, [
+        { type: 'unNegocio', value: 'Select' },
+        { type: 'plataforma', value: 'Meta' },
+      ]),
+      target: getTotal('budgetInvLiquido', undefined, [
+        { type: 'unNegocio', value: 'Select' },
+        { type: 'plataforma', value: 'Meta' },
+      ]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Select' },
+            { type: 'plataforma', value: 'Meta' },
+          ]),
+        ),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Meta' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Select' },
+            { type: 'plataforma', value: 'Meta' },
+          ]),
+        ),
+      ),
+    },
+    {
+      key: 'selectGoogleAds',
+      title: 'Select no Google Ads',
+      current: getTotal('investimento', undefined, [
+        { type: 'unNegocio', value: 'Select' },
+        { type: 'plataforma', value: 'Google Ads' },
+      ]),
+      target: getTotal('budgetInvLiquido', undefined, [
+        { type: 'unNegocio', value: 'Select' },
+        { type: 'plataforma', value: 'Google Ads' },
+      ]),
+      percentage: getBudgetConsumedPercentage(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+      ),
+      description: getDescription(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Select' },
+            { type: 'plataforma', value: 'Google Ads' },
+          ]),
+        ),
+      ),
+      descriptionType: getStatus(
+        getTotal('investimento', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getTotal('budgetInvLiquido', undefined, [
+          { type: 'unNegocio', value: 'Select' },
+          { type: 'plataforma', value: 'Google Ads' },
+        ]),
+        getProjection(
+          getTotal('investimento', undefined, [
+            { type: 'unNegocio', value: 'Select' },
+            { type: 'plataforma', value: 'Google Ads' },
+          ]),
+        ),
+      ),
+    },
+  ];
+
   return (
     <>
       <SectionTitle>Geral de Mídia</SectionTitle>
@@ -45,18 +307,18 @@ const Pacing = () => {
         <GoalCardPacing
           key={'all'}
           title={'Todas'}
-          current={getTotalInvestment()}
-          target={getTotalNetBudgetInvestment()}
-          percentage={getBudgetConsumedPercentage(getTotalInvestment(), getTotalNetBudgetInvestment())}
+          current={getTotal('investimento')}
+          target={getTotal('budgetInvLiquido')}
+          percentage={getBudgetConsumedPercentage(getTotal('investimento'), getTotal('budgetInvLiquido'))}
           description={getDescription(
-            getTotalInvestment(),
-            getTotalNetBudgetInvestment(),
-            getProjection(getTotalInvestment()),
+            getTotal('investimento'),
+            getTotal('budgetInvLiquido'),
+            getProjection(getTotal('investimento')),
           )}
           descriptionType={getStatus(
-            getTotalInvestment(),
-            getTotalNetBudgetInvestment(),
-            getProjection(getTotalInvestment()),
+            getTotal('investimento'),
+            getTotal('budgetInvLiquido'),
+            getProjection(getTotal('investimento')),
           )}
         />
       </div>
@@ -66,176 +328,56 @@ const Pacing = () => {
         <GoalCardPacing
           key={'meta'}
           title={'Meta'}
-          current={getTotalInvestment(undefined, 'plataforma', 'Meta')}
-          target={getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta')}
+          current={getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }])}
+          target={getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Meta' }])}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment(undefined, 'plataforma', 'Meta'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Meta' }]),
           )}
           description={getDescription(
-            getTotalInvestment(undefined, 'plataforma', 'Meta'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
-            getProjection(getTotalInvestment(undefined, 'plataforma', 'Meta')),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Meta' }]),
+            getProjection(getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }])),
           )}
           descriptionType={getStatus(
-            getTotalInvestment(undefined, 'plataforma', 'Meta'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Meta'),
-            getProjection(getTotalInvestment(undefined, 'plataforma', 'Meta')),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Meta' }]),
+            getProjection(getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Meta' }])),
           )}
         />
 
         <GoalCardPacing
           key={'google-ads'}
           title={'Google Ads'}
-          current={getTotalInvestment(undefined, 'plataforma', 'Google Ads')}
-          target={getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads')}
+          current={getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }])}
+          target={getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Google Ads' }])}
           percentage={getBudgetConsumedPercentage(
-            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
           )}
           description={getDescription(
-            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
-            getProjection(getTotalInvestment(undefined, 'plataforma', 'Google Ads')),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
+            getProjection(getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }])),
           )}
           descriptionType={getStatus(
-            getTotalInvestment(undefined, 'plataforma', 'Google Ads'),
-            getTotalNetBudgetInvestment(undefined, 'plataforma', 'Google Ads'),
-            getProjection(getTotalInvestment(undefined, 'plataforma', 'Google Ads')),
+            getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
+            getTotal('budgetInvLiquido', undefined, [{ type: 'plataforma', value: 'Google Ads' }]),
+            getProjection(getTotal('investimento', undefined, [{ type: 'plataforma', value: 'Google Ads' }])),
           )}
         />
       </div>
 
       <SectionTitle>Unidade de Negócio</SectionTitle>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8'>
-        <GoalCardPacing
-          key={'leilao'}
-          title={'Leilão'}
-          current={getTotalInvestment(undefined, 'unNegocio', 'Leilão')}
-          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
-          )}
-          description={getDescription(
-            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Leilão')),
-          )}
-          descriptionType={getStatus(
-            getTotalInvestment(undefined, 'unNegocio', 'Leilão'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Leilão'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Leilão')),
-          )}
-        />
-
-        <GoalCardPacing
-          key={'select'}
-          title={'Select'}
-          current={getTotalInvestment(undefined, 'unNegocio', 'Select')}
-          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalInvestment(undefined, 'unNegocio', 'Select'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
-          )}
-          description={getDescription(
-            getTotalInvestment(undefined, 'unNegocio', 'Select'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Select')),
-          )}
-          descriptionType={getStatus(
-            getTotalInvestment(undefined, 'unNegocio', 'Select'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Select'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Select')),
-          )}
-        />
-
-        <GoalCardPacing
-          key={'comitentes'}
-          title={'Comitentes'}
-          current={getTotalInvestment(undefined, 'unNegocio', 'Comitentes')}
-          target={getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
-          )}
-          description={getDescription(
-            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Comitentes')),
-          )}
-          descriptionType={getStatus(
-            getTotalInvestment(undefined, 'unNegocio', 'Comitentes'),
-            getTotalNetBudgetInvestment(undefined, 'unNegocio', 'Comitentes'),
-            getProjection(getTotalInvestment(undefined, 'unNegocio', 'Comitentes')),
-          )}
-        />
-      </div>
-
-      <SectionTitle>Verba Extra</SectionTitle>
-      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8'>
-        <GoalCardPacing
-          key={'totalVerbaExtra'}
-          title={'Verba Extra'}
-          current={getTotalExtraFunds('investimento')}
-          target={getTotalExtraFunds('budgetInvLiquido')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalExtraFunds('investimento'),
-            getTotalExtraFunds('budgetInvLiquido'),
-          )}
-          description={getDescription(
-            getTotalExtraFunds('investimento'),
-            getTotalExtraFunds('budgetInvLiquido'),
-            getProjection(getTotalExtraFunds('investimento')),
-          )}
-          descriptionType={getStatus(
-            getTotalExtraFunds('investimento'),
-            getTotalExtraFunds('budgetInvLiquido'),
-            getProjection(getTotalExtraFunds('investimento')),
-          )}
-        />
-
-        <GoalCardPacing
-          key={'totalVerbaExtraMetaAds'}
-          title={'Verba Extra Meta Ads'}
-          current={getTotalExtraFunds('investimento', 'plataforma', 'Meta')}
-          target={getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Meta')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalExtraFunds('investimento', 'plataforma', 'Meta'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Meta'),
-          )}
-          description={getDescription(
-            getTotalExtraFunds('investimento', 'plataforma', 'Meta'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Meta'),
-            getProjection(getTotalExtraFunds('investimento', 'plataforma', 'Meta')),
-          )}
-          descriptionType={getStatus(
-            getTotalExtraFunds('investimento', 'plataforma', 'Meta'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Meta'),
-            getProjection(getTotalExtraFunds('investimento', 'plataforma', 'Meta')),
-          )}
-        />
-
-        <GoalCardPacing
-          key={'totalVerbaExtraGoogleAds'}
-          title={'Verba Extra Google Ads'}
-          current={getTotalExtraFunds('investimento', 'plataforma', 'Google Ads')}
-          target={getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Google Ads')}
-          percentage={getBudgetConsumedPercentage(
-            getTotalExtraFunds('investimento', 'plataforma', 'Google Ads'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Google Ads'),
-          )}
-          description={getDescription(
-            getTotalExtraFunds('investimento', 'plataforma', 'Google Ads'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Google Ads'),
-            getProjection(getTotalExtraFunds('investimento', 'plataforma', 'Google Ads')),
-          )}
-          descriptionType={getStatus(
-            getTotalExtraFunds('investimento', 'plataforma', 'Google Ads'),
-            getTotalExtraFunds('budgetInvLiquido', 'plataforma', 'Google Ads'),
-            getProjection(getTotalExtraFunds('investimento', 'plataforma', 'Google Ads')),
-          )}
-        />
+      <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 mt-8'>
+        <div>
+          <h3 className='font-semibold mb-2 w-fit ml-1'>Leilão</h3>
+          <GoalTableCardPacing items={tableBusinessLeilao} />
+        </div>
+        <div>
+          <h3 className='font-semibold mb-2 w-fit ml-1'>Select</h3>
+          <GoalTableCardPacing items={tableBusinessSelect} />
+        </div>
       </div>
 
       <SectionTitle>Controle Financeiro - Mês Atual</SectionTitle>

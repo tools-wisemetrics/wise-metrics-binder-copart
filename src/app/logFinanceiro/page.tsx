@@ -27,14 +27,7 @@ const MONTHS = [
 const Pacing = () => {
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
-  const {
-    setMonth,
-    setMonthTotalDays,
-    setMonthDaysElapsed,
-    getTotalNetBudgetInvestment,
-    getTotalInvestment,
-    getTableData,
-  } = usePacing();
+  const { setMonth, setMonthTotalDays, setMonthDaysElapsed, getTotal, getTableData } = usePacing();
   const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long' });
 
   const chartData: GoalVsActualPoint[] = [
@@ -80,23 +73,23 @@ const Pacing = () => {
     },
     {
       label: MONTHS[8].name,
-      realized: getTotalInvestment(9),
-      goal: getTotalNetBudgetInvestment(9),
+      realized: getTotal('investimento', 9),
+      goal: getTotal('budgetInvLiquido', 9),
     },
     {
       label: MONTHS[9].name,
-      realized: getTotalInvestment(10),
-      goal: getTotalNetBudgetInvestment(10),
+      realized: getTotal('investimento', 10),
+      goal: getTotal('budgetInvLiquido', 10),
     },
     {
       label: MONTHS[10].name,
-      realized: getTotalInvestment(11),
-      goal: getTotalNetBudgetInvestment(11),
+      realized: getTotal('investimento', 11),
+      goal: getTotal('budgetInvLiquido', 11),
     },
     {
       label: MONTHS[11].name,
-      realized: getTotalInvestment(12),
-      goal: getTotalNetBudgetInvestment(12),
+      realized: getTotal('investimento', 12),
+      goal: getTotal('budgetInvLiquido', 12),
     },
   ];
 
