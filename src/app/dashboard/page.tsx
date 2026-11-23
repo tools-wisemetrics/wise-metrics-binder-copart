@@ -6,7 +6,15 @@ import { filtersFromSearchParams } from '@/lib/page-filters';
 import { formatDateRangeLabel, hrefWithFilters } from '@/lib/filters';
 import type { SearchParamRecord } from '@/lib/filters';
 import { InfoTip } from '@/components/layout/info-tip';
-import { CheckCircle2, Database, ShieldCheck, TrendingUp } from 'lucide-react';
+import {
+  CheckCircle2,
+  CircleDollarSign,
+  Database,
+  ShieldCheck,
+  Target,
+  TrendingUp,
+  TrendingUpIcon,
+} from 'lucide-react';
 
 import { PaidMediaView } from '@/components/paid-media/paid-media-view';
 import Pacing from '@/components/pacing/pacing';
@@ -179,10 +187,10 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           </div>
         </div> */}
 
-        <div className='flex items-center gap-8 mt-2 mb-8'>
-          {/* <div className='text-[#00b8cf]'>
-            <TrendingUp className='w-12 h-12' />
-          </div> */}
+        <div className='flex items-center gap-4 mt-2 mb-8'>
+          <div className='text-[#00b8cf]'>
+            <TrendingUpIcon className='w-10 h-10' />
+          </div>
 
           <div>
             <h2 className='text-xl font-black tracking-tight text-[#0b1f3a] border-b-2 border-[#00b8cf]'>
@@ -200,19 +208,19 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           paidEventsOK={paidEventsOK}
         />
 
-        <div className='flex items-center gap-8 mt-8 mb-8'>
-          {/* <div className='text-[#00b8cf]'>
-            <TrendingUp className='w-12 h-12' />
-          </div> */}
+        <div className='flex items-center gap-4 mt-8 mb-8'>
+          <div className='text-[#00b8cf]'>
+            <Target className='w-10 h-10' />
+          </div>
 
           <div>
             <h2 className='text-xl font-black tracking-tight text-[#0b1f3a] border-b-2 border-[#00b8cf]'>
-              Performance Metas Entrantes
+              Metas
             </h2>
           </div>
         </div>
 
-        <SectionTitle>Progresso vs metas por unidade</SectionTitle>
+        <SectionTitle>Progresso vs Metas</SectionTitle>
         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8'>
           {goals.map((g) => (
             <GoalCard
@@ -235,14 +243,16 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
           ))}
         </div>
 
-        <div className='flex items-center gap-16 mt-8 mb-8 relative'>
-          {/* <div className='text-[#00b8cf]'>
-            <TrendingUp className='w-12 h-12' />
-          </div> */}
+        <div className='flex items-center gap-8 mt-8 mb-8 relative'>
+          <div className='flex items-center gap-4 mt-8 mb-8'>
+            <div className='text-[#00b8cf]'>
+              <CircleDollarSign className='w-10 h-10' />
+            </div>
 
-          <h2 className='text-xl font-black tracking-tight text-[#0b1f3a] border-b-2 border-[#00b8cf]'>
-            Pacing Mídia Paga vs Orçado
-          </h2>
+            <h2 className='text-xl font-black tracking-tight text-[#0b1f3a] border-b-2 border-[#00b8cf]'>
+              Pacing Investido vs Planejado
+            </h2>
+          </div>
 
           <div className='bg-[#e8f8ef] px-3 py-1.5 rounded-xl border border-[#00a85a]/30 flex items-center gap-2'>
             <CheckCircle2 className='w-5 h-5 text-[#007342]' />
