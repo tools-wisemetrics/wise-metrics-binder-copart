@@ -48590,9 +48590,9 @@
       "investimento": 0.0,
       "dtAtualizacao": "2026-11-19",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-2",
@@ -48608,9 +48608,9 @@
       "investimento": 0.0,
       "dtAtualizacao": "2026-11-19",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-3",
@@ -48626,9 +48626,9 @@
       "investimento": 0.0,
       "dtAtualizacao": "2026-11-19",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-4",
@@ -48644,9 +48644,9 @@
       "investimento": 5364.56,
       "dtAtualizacao": "2026-11-24",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 3735.44,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-5",
@@ -48662,9 +48662,9 @@
       "investimento": 0.0,
       "dtAtualizacao": "2026-11-19",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-6",
@@ -48680,9 +48680,9 @@
       "investimento": 5218.11,
       "dtAtualizacao": "2026-11-24",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 9781.89,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-7",
@@ -48698,9 +48698,9 @@
       "investimento": 0.0,
       "dtAtualizacao": "2026-11-19",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-8",
@@ -48716,9 +48716,9 @@
       "investimento": 11278.9,
       "dtAtualizacao": "2026-11-24",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": -7378.9,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-9",
@@ -48734,9 +48734,9 @@
       "investimento": 3396.39,
       "dtAtualizacao": "2026-11-12",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 5603.61,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-10",
@@ -48752,9 +48752,9 @@
       "investimento": 0.0,
       "dtAtualizacao": null,
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1500.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-11",
@@ -48770,9 +48770,9 @@
       "investimento": 587.21,
       "dtAtualizacao": "2026-11-12",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 912.79,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-12",
@@ -48788,9 +48788,9 @@
       "investimento": 0.0,
       "dtAtualizacao": null,
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-13",
@@ -48806,9 +48806,9 @@
       "investimento": 2630.46,
       "dtAtualizacao": "2026-11-12",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 4369.54,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-14",
@@ -48824,9 +48824,9 @@
       "investimento": 0.0,
       "dtAtualizacao": null,
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 1255.0,
-      "diasRestantes": 5
+      "diasRestantes": 4
     },
     {
       "id": "pacing-15",
@@ -48842,9 +48842,9 @@
       "investimento": 572.67,
       "dtAtualizacao": "2026-11-12",
       "totalDiasMes": 30,
-      "diasDecorridos": 25,
+      "diasDecorridos": 26,
       "saldoRestante": 927.33,
-      "diasRestantes": 5
+      "diasRestantes": 4
     }
   ],
   "pacing_periodo": [
